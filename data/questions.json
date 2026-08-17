@@ -1,0 +1,24 @@
+{
+  "testTitle": "METE 256 — Pre-Test",
+  "testSubtitle": "Ore Beneficiation",
+  "questions": [
+    {
+      "id": "q_sample_mcq",
+      "type": "mcq",
+      "text": "This is a sample multiple-choice question. Edit or delete it from the Admin panel, then add your real questions.",
+      "timeLimit": 30,
+      "options": { "A": "Option A", "B": "Option B", "C": "Option C", "D": "Option D" },
+      "correct": "A"
+    },
+    {
+      "id": "q_sample_calc",
+      "type": "calc",
+      "text": "This is a sample calculation question. The student sees ONLY a number box — the power of 10 and the unit are fixed by you and shown as a label.",
+      "timeLimit": 60,
+      "correctValue": 2.5,
+      "exponent": -3,
+      "unit": "kg",
+      "tolerancePct": 5
+    }
+  ]
+}
