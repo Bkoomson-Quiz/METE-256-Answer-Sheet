@@ -309,7 +309,11 @@ function showView(name){
 /* ══════════════ ADMIN VISIBILITY (hidden by default) ══════════════ */
 (function initAdminVisibility(){
   const params = new URLSearchParams(location.search);
-  if(params.get('admin')==='1'){
+  let adminParamValue = null;
+  for(const [key, value] of params.entries()){
+    if(key.toLowerCase() === 'admin'){ adminParamValue = value; break; }
+  }
+  if(adminParamValue === '1'){
     localStorage.setItem('kn_admin_visible','1');
     history.replaceState({}, '', location.pathname);
   }
