@@ -48,32 +48,45 @@ input:focus,textarea:focus,select:focus{border-color:var(--brown-mid);box-shadow
 #admin-entry-btn{position:fixed;bottom:16px;right:16px;z-index:50;background:var(--brown-deep);color:#fff;border:none;border-radius:30px;padding:10px 18px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;opacity:.55;box-shadow:0 4px 16px rgba(0,0,0,.2);}
 #admin-entry-btn:hover{opacity:1;}
 
-/* quiz header */
-.quiz-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
-.progress-bar{height:8px;background:var(--surface2);border-radius:10px;overflow:hidden;margin-top:6px;}
-.progress-fill{height:100%;background:linear-gradient(90deg,#7b4a2d,#c2763a);transition:width .3s;}
-#q-timer{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:var(--brown-mid);}
-#q-timer.warn{color:var(--warning);}
-#q-timer.danger{color:var(--danger);animation:pulse .6s infinite alternate;}
+/* sheet header */
+.sheet-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:18px 24px;margin-bottom:20px;box-shadow:var(--shadow);}
+.student-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--brown-deep);}
+.student-meta{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.timer-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:center;}
+#timer-display{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700;color:var(--brown-mid);text-align:center;line-height:1;}
+#timer-display.warning{color:var(--warning);}
+#timer-display.danger{color:var(--danger);animation:pulse .6s infinite alternate;}
 @keyframes pulse{from{opacity:1}to{opacity:.5}}
-.qtext{font-size:18px;line-height:1.6;margin:18px 0 22px;color:var(--text);}
-.mcq-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:.15s;}
-.mcq-opt:hover{border-color:var(--brown-mid);background:rgba(123,74,45,.05);}
-.mcq-opt.selected{border-color:var(--brown-mid);background:var(--brown-mid);color:#fff;}
-.mcq-letter{width:32px;height:32px;border-radius:8px;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
-.calc-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.calc-row input{max-width:180px;}
-.unit-tag{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--brown-mid);background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;}
-.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:26px;}
+.tab-warning{font-size:12px;color:var(--danger);font-family:'JetBrains Mono',monospace;background:rgba(155,48,48,.1);border:1px solid rgba(155,48,48,.3);border-radius:8px;padding:5px 12px;display:none;}
+.tab-warning.visible{display:block;}
+
+/* answer grid */
+.grid-container{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);}
+.grid-title{padding:16px 24px;background:var(--brown-deep);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);display:flex;justify-content:space-between;align-items:center;}
+.answered-count{font-family:'JetBrains Mono',monospace;color:#f0c897;font-size:13px;}
+.q-row{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid rgba(226,205,184,.5);}
+.q-row:last-child{border-bottom:none;}
+.q-row.answered{background:rgba(74,124,89,.06);}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--muted);width:44px;flex-shrink:0;}
+.q-widget{flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.mcq-opts{display:flex;gap:8px;}
+.mcq-opts input[type=radio]{display:none;}
+.mcq-opts label{width:44px;height:44px;border-radius:10px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;transition:.15s;}
+.mcq-opts label:hover{border-color:var(--brown-mid);color:var(--brown-mid);background:rgba(123,74,45,.08);}
+.mcq-opts input:checked+label{border-color:var(--brown-mid);background:var(--brown-mid);color:#fff;}
+.q-widget input[type=text],.q-widget input[type=number]{max-width:260px;}
+.unit-tag{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--brown-mid);background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;white-space:nowrap;}
+.submit-area{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:20px;flex-wrap:wrap;}
+.submit-note{font-size:13px;color:var(--muted);flex:1;}
 
 /* admin */
 .tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
 .tab-btn{padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--brown-mid);font-weight:700;font-size:13px;cursor:pointer;}
 .tab-btn.active{background:var(--brown-mid);color:#fff;border-color:var(--brown-mid);}
-.q-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--surface2);}
-.q-row-text{font-size:14px;color:var(--text);}
-.q-row-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
-.q-row-actions{display:flex;gap:6px;flex-shrink:0;}
+.admin-q-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--surface2);}
+.admin-q-row-text{font-size:14px;color:var(--text);font-weight:700;}
+.admin-q-row-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.admin-q-row-actions{display:flex;gap:6px;flex-shrink:0;}
 .small-btn{padding:7px 12px;font-size:12px;border-radius:8px;}
 .status-msg{font-size:13px;padding:10px 14px;border-radius:10px;margin-top:12px;}
 .status-ok{background:rgba(74,124,89,.1);color:var(--success);border:1px solid rgba(74,124,89,.3);}
@@ -86,10 +99,10 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-
 .stat-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:var(--brown-mid);}
 .stat-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
 .overlay{position:fixed;inset:0;background:rgba(61,31,13,.5);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:var(--surface);border-radius:18px;padding:32px;max-width:480px;width:100%;box-shadow:var(--shadow);}
+.modal{background:var(--surface);border-radius:18px;padding:32px;max-width:460px;width:100%;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto;}
 .type-toggle{display:flex;gap:8px;margin-bottom:18px;}
 .type-toggle button{flex:1;}
-@media(max-width:600px){.grid2,.chip-grid-2,.stat-cards{grid-template-columns:1fr 1fr;} .card{padding:22px;}}
+@media(max-width:600px){.grid2,.chip-grid-2,.stat-cards{grid-template-columns:1fr 1fr;} .card{padding:22px;} .q-row{flex-direction:column;align-items:flex-start;}}
 </style>
 </head>
 <body>
@@ -120,26 +133,33 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-
   <div class="footer">©Team Benny</div>
 </div>
 
-<!-- STUDENT QUIZ -->
+<!-- STUDENT ANSWER SHEET (single page, all questions, projected on screen) -->
 <div id="view-student-quiz" class="wrap hidden">
-  <div class="card">
-    <div class="quiz-head">
-      <div>
-        <div style="font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;" id="q-progress-text">Question 1 of 1</div>
-        <div class="progress-bar" style="width:220px;"><div class="progress-fill" id="q-progress-fill" style="width:0%;"></div></div>
-      </div>
-      <div style="text-align:center;">
-        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">Time Left</div>
-        <div id="q-timer">--</div>
-      </div>
+  <div class="sheet-header">
+    <div>
+      <div class="student-name" id="disp-name">—</div>
+      <div class="student-meta" id="disp-meta">—</div>
     </div>
-    <div class="qtext" id="q-text">—</div>
-    <div id="q-body"></div>
-    <div class="nav-row">
-      <span style="font-size:12px;color:var(--muted);" id="tab-warn-quiz"></span>
-      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion(false)">Next →</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <div class="timer-label">Time Remaining</div>
+      <div id="timer-display">--:--</div>
+      <div class="tab-warning" id="tab-warn">⚠ Tab switch detected</div>
     </div>
   </div>
+
+  <div class="grid-container">
+    <div class="grid-title">
+      <span>Answer Sheet</span>
+      <span class="answered-count"><span id="ans-count">0</span> / <span id="ans-total">0</span> answered</span>
+    </div>
+    <div id="answer-grid"></div>
+  </div>
+
+  <div class="submit-area">
+    <div class="submit-note">Follow along with the questions on screen. Review before submitting — you can't change answers after.</div>
+    <button class="btn btn-success" id="btn-submit" onclick="submitQuiz()">Submit Answers</button>
+  </div>
+  <div class="footer">©Team Benny</div>
 </div>
 
 <!-- STUDENT THANKS -->
@@ -190,6 +210,8 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-
       <div class="field" style="margin:0;"><label>Test Title</label><input type="text" id="meta-title"/></div>
       <div class="field" style="margin:0;"><label>Test Subtitle</label><input type="text" id="meta-subtitle"/></div>
     </div>
+    <div class="field" style="max-width:220px;"><label>Total Time (minutes)</label><input type="number" id="meta-time" min="1" value="9"/></div>
+    <div class="info">No question text needed here — you'll project the actual questions on screen. Just add one entry per question in order, choose its type, and set the correct answer. The number that appears is just the question's position (Q1, Q2, …).</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <h3 style="font-size:16px;">Questions (<span id="q-count">0</span>)</h3>
       <button class="btn btn-primary small-btn" onclick="openQuestionEditor(null)">+ Add Question</button>
@@ -251,33 +273,35 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-
     <h3 style="font-size:18px;margin-bottom:16px;" id="editor-title">Add Question</h3>
     <div class="type-toggle">
       <button type="button" class="chip selected" id="type-mcq-btn" onclick="setEditorType('mcq')">Multiple Choice</button>
+      <button type="button" class="chip" id="type-text-btn" onclick="setEditorType('text')">Word Answer</button>
       <button type="button" class="chip" id="type-calc-btn" onclick="setEditorType('calc')">Calculation</button>
     </div>
-    <div class="field"><label>Question Text</label><textarea id="ed-text"></textarea></div>
-    <div class="field"><label>Time Limit (seconds)</label><input type="number" id="ed-time" value="30" min="5"/></div>
 
     <div id="ed-mcq-fields">
-      <div class="grid2">
-        <div class="field"><label>Option A</label><input type="text" id="ed-optA"/></div>
-        <div class="field"><label>Option B</label><input type="text" id="ed-optB"/></div>
-        <div class="field"><label>Option C</label><input type="text" id="ed-optC"/></div>
-        <div class="field"><label>Option D</label><input type="text" id="ed-optD"/></div>
-      </div>
       <div class="field"><label>Correct Answer</label>
         <select id="ed-correct"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
       </div>
     </div>
 
+    <div id="ed-text-fields" class="hidden">
+      <div class="field"><label>Accepted Answer(s)</label>
+        <input type="text" id="ed-correcttext" placeholder="e.g. froth flotation, flotation"/>
+      </div>
+      <div class="info" style="margin-bottom:0;">Separate multiple acceptable spellings with commas. Matching ignores capitalization and extra spaces.</div>
+    </div>
+
     <div id="ed-calc-fields" class="hidden">
       <label style="display:block;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--brown-mid);margin-bottom:7px;">Correct Value · ×10^ Exponent · Unit</label>
-      <div class="calc-row" style="margin-bottom:16px;">
-        <input type="number" id="ed-calcvalue" placeholder="Value" step="any"/>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <input type="number" id="ed-calcvalue" placeholder="Value" step="any" style="max-width:140px;"/>
         <span>× 10^</span>
-        <input type="number" id="ed-calcexp" placeholder="Exponent" value="0"/>
-        <input type="text" id="ed-calcunit" placeholder="Unit (e.g. kg)"/>
+        <input type="number" id="ed-calcexp" placeholder="Exponent" value="0" style="max-width:100px;"/>
+        <input type="text" id="ed-calcunit" placeholder="Unit (e.g. kg)" style="max-width:140px;"/>
       </div>
-      <div class="field"><label>Tolerance (%)</label><input type="number" id="ed-tolerance" value="5" min="0"/></div>
+      <div class="field"><label>Tolerance (%)</label><input type="number" id="ed-tolerance" value="5" min="0" style="max-width:140px;"/></div>
     </div>
+
+    <div class="field"><label>Admin Note (optional, students never see this)</label><textarea id="ed-note" placeholder="e.g. reminder of the actual question, for your own reference"></textarea></div>
 
     <div style="display:flex;gap:10px;margin-top:10px;">
       <button class="btn btn-primary" onclick="saveQuestionFromEditor()">Save Question</button>
@@ -341,7 +365,7 @@ document.querySelectorAll('#prog-grid .chip').forEach(btn=>{
 })();
 
 /* ══════════════ LOAD QUESTIONS (public, relative fetch) ══════════════ */
-let testData = { testTitle:"METE 256 — Pre-Test", testSubtitle:"Ore Beneficiation", questions:[] };
+let testData = { testTitle:"METE 256 — Pre-Test", testSubtitle:"Ore Beneficiation", timeLimitMinutes:9, questions:[] };
 async function loadPublicQuestions(){
   try{
     const res = await fetch('./data/questions.json?t='+Date.now(), {cache:'no-store'});
@@ -350,19 +374,18 @@ async function loadPublicQuestions(){
   document.getElementById('reg-badge').textContent = testData.testTitle || 'Pre-Test';
   document.getElementById('reg-subtitle').textContent = testData.testSubtitle || '';
   document.getElementById('reg-info').textContent =
-    `${(testData.questions||[]).length} questions · each question has its own timer · answer in order, no going back · must remain on this tab`;
+    `${(testData.questions||[]).length} questions · questions are shown on the projector, not here · total time: ${testData.timeLimitMinutes||9} minutes · tab switch = −1.5 pts penalty`;
 }
 loadPublicQuestions();
 
 /* ══════════════ QUIZ STATE ══════════════ */
 let studentName='', indexNumber='';
 let answers = {};
-let currentQIndex = 0;
 let tabSwitches = 0;
 let submitted = false;
-let qTimerInterval = null;
-let qTimeLeft = 0;
-let quizStartMs = 0;
+let timerInterval = null;
+let timeLeft = 0;
+let totalTime = 0;
 
 async function beginQuiz(){
   const nameEl = document.getElementById('reg-name');
@@ -394,11 +417,23 @@ async function beginQuiz(){
 
   studentName = nameEl.value.trim();
   indexNumber = idxEl.value.trim();
-  answers = {}; currentQIndex = 0; tabSwitches = 0; submitted = false;
-  quizStartMs = Date.now();
+  answers = {}; tabSwitches = 0; submitted = false;
 
+  document.getElementById('disp-name').textContent = studentName;
+  document.getElementById('disp-meta').textContent = `${indexNumber} · ${programme} · ${groupNumber}`;
+  document.getElementById('thanks-name').textContent = studentName;
+
+  buildAnswerGrid();
   showView('student-quiz');
-  renderQuestion(0);
+
+  totalTime = (testData.timeLimitMinutes || 9) * 60;
+  timeLeft = totalTime;
+  updateTimerDisplay();
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft<=0){ clearInterval(timerInterval); submitQuiz(); }
+  },1000);
 
   document.addEventListener('contextmenu', e=>e.preventDefault());
   document.addEventListener('copy', e=>e.preventDefault());
@@ -406,78 +441,77 @@ async function beginQuiz(){
 }
 
 document.addEventListener('visibilitychange', ()=>{
-  if(document.hidden && !submitted && quizStartMs){
+  if(document.hidden && !submitted && timerInterval){
     tabSwitches++;
-    document.getElementById('tab-warn-quiz').textContent = `⚠ Tab switches: ${tabSwitches} (−${(tabSwitches*TAB_PENALTY).toFixed(1)} pts)`;
+    const warn = document.getElementById('tab-warn');
+    warn.textContent = `⚠ Tab switches: ${tabSwitches} (−${(tabSwitches*TAB_PENALTY).toFixed(1)} pts)`;
+    warn.classList.add('visible');
+    setTimeout(()=>warn.classList.remove('visible'), 3000);
   }
 });
 
-function renderQuestion(idx){
-  clearInterval(qTimerInterval);
-  const q = testData.questions[idx];
-  if(!q){ return finishQuiz(); }
-
-  document.getElementById('q-progress-text').textContent = `Question ${idx+1} of ${testData.questions.length}`;
-  document.getElementById('q-progress-fill').style.width = `${(idx/testData.questions.length)*100}%`;
-  document.getElementById('q-text').textContent = q.text;
-  document.getElementById('btn-next').textContent = (idx===testData.questions.length-1) ? 'Submit' : 'Next →';
-
-  const body = document.getElementById('q-body');
-  body.innerHTML = '';
-
-  if(q.type==='mcq'){
-    ['A','B','C','D'].forEach(letter=>{
-      if(!q.options || !q.options[letter]) return;
-      const row = document.createElement('div');
-      row.className = 'mcq-opt' + (answers[q.id]===letter ? ' selected':'');
-      row.innerHTML = `<span class="mcq-letter">${letter}</span><span>${q.options[letter]}</span>`;
-      row.onclick = ()=>{ answers[q.id]=letter; renderQuestion(idx); };
-      body.appendChild(row);
-    });
-  } else if(q.type==='calc'){
-    const row = document.createElement('div');
-    row.className = 'calc-row';
-    const expTxt = (q.exponent && q.exponent!==0) ? ` × 10^${q.exponent}` : '';
-    row.innerHTML = `
-      <input type="number" step="any" id="calc-input" placeholder="Your answer" value="${answers[q.id]??''}"/>
-      <span class="unit-tag">${expTxt}${q.unit? ' '+q.unit : ''}</span>
-    `;
-    body.appendChild(row);
-    document.getElementById('calc-input').addEventListener('input', e=>{ answers[q.id]=e.target.value; });
-  }
-
-  qTimeLeft = q.timeLimit || 30;
-  updateTimerDisplay();
-  qTimerInterval = setInterval(()=>{
-    qTimeLeft--;
-    updateTimerDisplay();
-    if(qTimeLeft<=0){ clearInterval(qTimerInterval); nextQuestion(true); }
-  },1000);
-}
-
 function updateTimerDisplay(){
-  const el = document.getElementById('q-timer');
-  el.textContent = qTimeLeft;
-  el.classList.remove('warn','danger');
-  if(qTimeLeft<=5) el.classList.add('danger');
-  else if(qTimeLeft<=10) el.classList.add('warn');
+  const el = document.getElementById('timer-display');
+  const mins = Math.floor(timeLeft/60), secs = timeLeft%60;
+  el.textContent = `${mins}:${String(secs).padStart(2,'0')}`;
+  el.classList.remove('warning','danger');
+  if(timeLeft<=30) el.classList.add('danger');
+  else if(timeLeft<=60) el.classList.add('warning');
 }
 
-function nextQuestion(auto){
-  clearInterval(qTimerInterval);
-  if(currentQIndex >= testData.questions.length-1){
-    finishQuiz();
-  } else {
-    currentQIndex++;
-    renderQuestion(currentQIndex);
-  }
+function buildAnswerGrid(){
+  const container = document.getElementById('answer-grid');
+  container.innerHTML = '';
+  document.getElementById('ans-total').textContent = testData.questions.length;
+  document.getElementById('ans-count').textContent = 0;
+
+  testData.questions.forEach((q,i)=>{
+    const row = document.createElement('div');
+    row.className = 'q-row';
+    row.id = `row-${q.id}`;
+
+    let widgetHtml = '';
+    if(q.type==='mcq'){
+      widgetHtml = `<div class="mcq-opts">` + ['A','B','C','D'].map(letter=>`
+        <input type="radio" name="${q.id}" id="${q.id}${letter}" value="${letter}">
+        <label for="${q.id}${letter}">${letter}</label>
+      `).join('') + `</div>`;
+    } else if(q.type==='text'){
+      widgetHtml = `<input type="text" id="input-${q.id}" placeholder="Type your answer" autocomplete="off"/>`;
+    } else if(q.type==='calc'){
+      const expTxt = (q.exponent && q.exponent!==0) ? ` × 10^${q.exponent}` : '';
+      widgetHtml = `<input type="number" step="any" id="input-${q.id}" placeholder="Number only"/><span class="unit-tag">${expTxt}${q.unit? ' '+q.unit : ''}</span>`;
+    }
+
+    row.innerHTML = `<div class="q-num">Q${i+1}</div><div class="q-widget">${widgetHtml}</div>`;
+    container.appendChild(row);
+
+    if(q.type==='mcq'){
+      row.querySelectorAll('input[type=radio]').forEach(radio=>{
+        radio.addEventListener('change', ()=>{ answers[q.id]=radio.value; markAnswered(q.id); });
+      });
+    } else {
+      const inp = row.querySelector(`#input-${q.id}`);
+      inp.addEventListener('input', ()=>{
+        if(inp.value.trim()==='') delete answers[q.id]; else answers[q.id]=inp.value;
+        markAnswered(q.id);
+      });
+    }
+  });
 }
 
-async function finishQuiz(){
+function markAnswered(qid){
+  const row = document.getElementById(`row-${qid}`);
+  row.classList.toggle('answered', answers[qid]!==undefined && answers[qid]!=='');
+  document.getElementById('ans-count').textContent = Object.keys(answers).filter(k=>answers[k]!==undefined && answers[k]!=='').length;
+}
+
+async function submitQuiz(){
   if(submitted) return;
   submitted = true;
-  clearInterval(qTimerInterval);
-  document.getElementById('btn-next').disabled = true;
+  clearInterval(timerInterval);
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-submit').textContent = 'Submitting…';
 
   let rawScore = 0;
   const detail = [];
@@ -486,6 +520,11 @@ async function finishQuiz(){
     let correct = false;
     if(q.type==='mcq'){
       correct = given === q.correct;
+    } else if(q.type==='text'){
+      if(given!==undefined){
+        const accepted = (q.correctText||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+        correct = accepted.includes(String(given).trim().toLowerCase());
+      }
     } else if(q.type==='calc'){
       const num = parseFloat(given);
       if(!isNaN(num)){
@@ -502,7 +541,7 @@ async function finishQuiz(){
   const finalScore = Math.max(0, rawScore - tabDeduction);
   const totalQ = testData.questions.length;
   const percentage = ((finalScore/totalQ)*100).toFixed(1);
-  const timeUsedSeconds = Math.round((Date.now()-quizStartMs)/1000);
+  const timeUsedSeconds = totalTime - timeLeft;
 
   const payload = {
     sheet:'Sheet1', studentName, indexNumber, groupNumber, programme,
@@ -516,7 +555,6 @@ async function finishQuiz(){
     await fetch(GOOGLE_SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
   }catch(e){ console.error('Submit error', e); }
 
-  document.getElementById('thanks-name').textContent = studentName;
   showView('student-thanks');
 }
 
@@ -571,6 +609,7 @@ async function loadQuestionsIntoAdmin(){
   adminQuestions = JSON.parse(JSON.stringify(testData.questions||[]));
   document.getElementById('meta-title').value = testData.testTitle || '';
   document.getElementById('meta-subtitle').value = testData.testSubtitle || '';
+  document.getElementById('meta-time').value = testData.timeLimitMinutes || 9;
   renderAdminQuestionList();
 }
 
@@ -580,16 +619,17 @@ function renderAdminQuestionList(){
   document.getElementById('q-count').textContent = adminQuestions.length;
   adminQuestions.forEach((q,i)=>{
     const row = document.createElement('div');
-    row.className = 'q-row';
-    const meta = q.type==='mcq'
-      ? `MCQ · correct: ${q.correct} · ${q.timeLimit}s`
-      : `Calc · ${q.correctValue}×10^${q.exponent} ${q.unit} · ±${q.tolerancePct}% · ${q.timeLimit}s`;
+    row.className = 'admin-q-row';
+    let meta = '';
+    if(q.type==='mcq') meta = `Multiple Choice · correct: ${q.correct}`;
+    else if(q.type==='text') meta = `Word Answer · accepted: ${q.correctText||'—'}`;
+    else meta = `Calculation · ${q.correctValue}×10^${q.exponent} ${q.unit} · ±${q.tolerancePct}%`;
     row.innerHTML = `
       <div>
-        <div class="q-row-text">${i+1}. ${(q.text||'').slice(0,80)}${(q.text||'').length>80?'…':''}</div>
-        <div class="q-row-meta">${meta}</div>
+        <div class="admin-q-row-text">Q${i+1}${q.note?` — ${q.note}`:''}</div>
+        <div class="admin-q-row-meta">${meta}</div>
       </div>
-      <div class="q-row-actions">
+      <div class="admin-q-row-actions">
         <button class="btn btn-ghost small-btn" onclick="moveQuestion(${i},-1)">↑</button>
         <button class="btn btn-ghost small-btn" onclick="moveQuestion(${i},1)">↓</button>
         <button class="btn btn-ghost small-btn" onclick="openQuestionEditor('${q.id}')">Edit</button>
@@ -615,18 +655,14 @@ function openQuestionEditor(id){
   editingQuestionId = id;
   const q = id ? adminQuestions.find(x=>x.id===id) : null;
   document.getElementById('editor-title').textContent = id ? 'Edit Question' : 'Add Question';
-  document.getElementById('ed-text').value = q?.text || '';
-  document.getElementById('ed-time').value = q?.timeLimit || 30;
   setEditorType(q?.type || 'mcq');
-  document.getElementById('ed-optA').value = q?.options?.A || '';
-  document.getElementById('ed-optB').value = q?.options?.B || '';
-  document.getElementById('ed-optC').value = q?.options?.C || '';
-  document.getElementById('ed-optD').value = q?.options?.D || '';
   document.getElementById('ed-correct').value = q?.correct || 'A';
+  document.getElementById('ed-correcttext').value = q?.correctText || '';
   document.getElementById('ed-calcvalue').value = q?.correctValue ?? '';
   document.getElementById('ed-calcexp').value = q?.exponent ?? 0;
   document.getElementById('ed-calcunit').value = q?.unit || '';
   document.getElementById('ed-tolerance').value = q?.tolerancePct ?? 5;
+  document.getElementById('ed-note').value = q?.note || '';
   document.getElementById('editor-overlay').classList.remove('hidden');
 }
 function closeEditor(){ document.getElementById('editor-overlay').classList.add('hidden'); }
@@ -635,33 +671,31 @@ let editorType = 'mcq';
 function setEditorType(type){
   editorType = type;
   document.getElementById('type-mcq-btn').classList.toggle('selected', type==='mcq');
+  document.getElementById('type-text-btn').classList.toggle('selected', type==='text');
   document.getElementById('type-calc-btn').classList.toggle('selected', type==='calc');
   document.getElementById('ed-mcq-fields').classList.toggle('hidden', type!=='mcq');
+  document.getElementById('ed-text-fields').classList.toggle('hidden', type!=='text');
   document.getElementById('ed-calc-fields').classList.toggle('hidden', type!=='calc');
 }
 
 function saveQuestionFromEditor(){
-  const text = document.getElementById('ed-text').value.trim();
-  const timeLimit = parseInt(document.getElementById('ed-time').value,10) || 30;
-  if(!text){ alert('Please enter question text.'); return; }
-
+  const note = document.getElementById('ed-note').value.trim();
   let q;
   if(editorType==='mcq'){
-    q = {
-      id: editingQuestionId || ('q_'+Date.now()+Math.random().toString(36).slice(2,7)),
-      type:'mcq', text, timeLimit,
-      options:{ A:document.getElementById('ed-optA').value, B:document.getElementById('ed-optB').value,
-                C:document.getElementById('ed-optC').value, D:document.getElementById('ed-optD').value },
-      correct: document.getElementById('ed-correct').value,
-    };
+    q = { id: editingQuestionId || ('q_'+Date.now()+Math.random().toString(36).slice(2,7)), type:'mcq', correct: document.getElementById('ed-correct').value, note };
+  } else if(editorType==='text'){
+    const txt = document.getElementById('ed-correcttext').value.trim();
+    if(!txt){ alert('Please enter at least one accepted answer.'); return; }
+    q = { id: editingQuestionId || ('q_'+Date.now()+Math.random().toString(36).slice(2,7)), type:'text', correctText: txt, note };
   } else {
     q = {
       id: editingQuestionId || ('q_'+Date.now()+Math.random().toString(36).slice(2,7)),
-      type:'calc', text, timeLimit,
+      type:'calc',
       correctValue: parseFloat(document.getElementById('ed-calcvalue').value)||0,
       exponent: parseInt(document.getElementById('ed-calcexp').value,10)||0,
       unit: document.getElementById('ed-calcunit').value.trim(),
       tolerancePct: parseFloat(document.getElementById('ed-tolerance').value)||5,
+      note,
     };
   }
 
@@ -712,6 +746,7 @@ async function publishQuestions(){
   const payload = {
     testTitle: document.getElementById('meta-title').value.trim() || 'Pre-Test',
     testSubtitle: document.getElementById('meta-subtitle').value.trim() || '',
+    timeLimitMinutes: parseInt(document.getElementById('meta-time').value,10) || 9,
     questions: adminQuestions,
   };
   try{
