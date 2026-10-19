@@ -3,691 +3,86 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Quiz Builder — Main</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<title>Quiz Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
 :root{
-  --bg:#fdf8f3; --surface:#fff; --surface2:#f5ede3; --border:#e2cdb8;
-  --brown-deep:#3d1f0d; --brown-mid:#7b4a2d; --success:#4a7c59; --danger:#9b3030;
-  --text:#2a1408; --muted:#9c7a64; --shadow:0 4px 32px rgba(61,31,13,0.10);
+  --bg:#ffffff; --surface:#ffffff; --surface2:#f3f7fe; --border:#cddcf3;
+  --blue:#1d4ed8; --blue-dark:#173ea8; --blue-soft:#e6efff; --blue-line:#9db8ee;
+  --success:#15803d; --danger:#b91c1c; --warning:#b45309;
+  --text:#000; --muted:#3f4a59; --shadow:0 4px 24px rgba(29,78,216,.10);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#000;min-height:100vh;}
 .hidden{display:none !important;}
 .wrap{max-width:860px;margin:0 auto;padding:24px 16px 48px;}
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:32px;margin-bottom:20px;}
-h1,h2,h3{font-family:'Playfair Display',serif;color:var(--brown-deep);}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:30px;margin-bottom:20px;}
+h1,h2,h3{font-family:'DM Sans',sans-serif;font-weight:800;color:#000;letter-spacing:-.01em;}
+.topbar{height:6px;background:linear-gradient(90deg,var(--blue),#4f8bff);}
+.badge{display:inline-block;background:var(--blue-soft);border:1.5px solid var(--blue-line);color:#000;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:30px;}
 .field{margin-bottom:18px;}
-.field label,.lbl{display:block;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--brown-mid);margin-bottom:7px;}
+.field label,.lbl{display:block;font-size:12px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:#000;margin-bottom:7px;}
 input[type=text],input[type=number],input[type=password],textarea,select{
-  width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;
-  font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;}
+  width:100%;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;
+  font-family:'DM Sans',sans-serif;font-size:15px;color:#000;outline:none;}
 textarea{resize:vertical;min-height:70px;}
-input:focus,textarea:focus,select:focus{border-color:var(--brown-mid);box-shadow:0 0 0 3px rgba(123,74,45,.12);}
-.btn{cursor:pointer;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:13px 26px;transition:transform .15s;}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,78,216,.15);}
+.btn{cursor:pointer;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:13px 26px;transition:transform .15s,background .15s;}
 .btn:hover{transform:translateY(-1px);}
-.btn-primary{background:linear-gradient(135deg,#7b4a2d,#5c3520);color:#fff;}
-.btn-success{background:linear-gradient(135deg,#4a7c59,#366044);color:#fff;}
-.btn-danger{background:#9b3030;color:#fff;}
-.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--brown-mid);}
+.btn-primary,.btn-success{background:var(--blue);color:#fff;box-shadow:0 4px 16px rgba(29,78,216,.25);}
+.btn-primary:hover,.btn-success:hover{background:var(--blue-dark);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-ghost{background:#fff;border:1.5px solid var(--blue-line);color:#000;}
+.btn-ghost:hover{background:var(--blue-soft);}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
 .small-btn{padding:7px 12px;font-size:12px;border-radius:8px;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.chip{padding:12px 8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;text-align:center;}
-.chip:hover{border-color:var(--brown-mid);color:var(--brown-mid);}
-.chip.selected{border-color:var(--brown-mid);background:var(--brown-mid);color:#fff;}
+.chip{padding:12px 8px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-weight:600;font-size:14px;color:#000;cursor:pointer;text-align:center;}
+.chip:hover{border-color:var(--blue);background:var(--surface2);}
+.chip.selected{border-color:var(--blue);background:var(--blue-soft);box-shadow:inset 0 0 0 1px var(--blue);font-weight:800;}
 .toggle{display:flex;gap:8px;margin-bottom:14px;}
 .toggle .chip{flex:1;}
-.info{background:rgba(194,118,58,.08);border:1.5px solid rgba(194,118,58,.3);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--brown-mid);line-height:1.6;margin-bottom:20px;}
-.status-msg{font-size:13px;padding:10px 14px;border-radius:10px;margin-top:12px;}
-.status-ok{background:rgba(74,124,89,.1);color:var(--success);border:1px solid rgba(74,124,89,.3);}
-.status-err{background:rgba(155,48,48,.1);color:var(--danger);border:1px solid rgba(155,48,48,.3);}
-.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-.tab-btn{padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--brown-mid);font-weight:700;font-size:13px;cursor:pointer;}
-.tab-btn.active{background:var(--brown-mid);color:#fff;border-color:var(--brown-mid);}
-.admin-q-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--surface2);flex-wrap:wrap;}
-.q-title{font-size:14px;font-weight:700;}
-.q-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
-.q-actions{display:flex;gap:6px;}
-table{width:100%;border-collapse:collapse;font-size:14px;}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);}
-th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-mid);}
-.stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
-.stat-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:16px;text-align:center;}
-.stat-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:var(--brown-mid);}
-.stat-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
-.overlay{position:fixed;inset:0;background:rgba(61,31,13,.5);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:var(--surface);border-radius:18px;padding:32px;max-width:560px;width:100%;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto;}
-.share{display:flex;gap:24px;align-items:center;flex-wrap:wrap;}
-#qr{background:#fff;padding:10px;border-radius:12px;border:1.5px solid var(--border);}
+.info{background:var(--blue-soft);border:1.5px solid #bcd0f5;border-radius:10px;padding:14px 16px;font-size:13px;color:#000;line-height:1.6;margin-bottom:20px;}
+.err{background:#fff;color:#000;border:1.5px solid var(--danger);border-left-width:6px;border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:16px;}
+.status-msg{font-size:13px;padding:10px 14px;border-radius:10px;margin-top:12px;color:#000;background:var(--surface2);border:1px solid var(--border);}
+.status-ok{border-left:5px solid var(--success);background:#f1faf4;}
+.status-err{border-left:5px solid var(--danger);background:#fff5f5;}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-@media(max-width:600px){.grid2,.grid3,.stat-cards{grid-template-columns:1fr;} .card{padding:20px;}}
+.footer{text-align:center;margin-top:26px;font-size:12px;color:var(--muted);letter-spacing:1px;}
+.overlay{position:fixed;inset:0;background:rgba(10,25,60,.45);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#fff;border-radius:18px;padding:30px;max-width:560px;width:100%;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);color:#000;}
+th{font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--surface2);}
+@keyframes pulse{from{opacity:1}to{opacity:.5}}
+@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr;} .card{padding:20px;}}
 
-/* projector */
-#proj{position:fixed;inset:0;z-index:200;background:#1d0e05;color:#fdf8f3;display:flex;flex-direction:column;}
-#proj .p-top{display:flex;justify-content:space-between;align-items:center;padding:20px 40px;border-bottom:1px solid rgba(255,255,255,.12);gap:20px;}
-#proj .p-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;}
-#proj .p-num{font-size:15px;letter-spacing:3px;text-transform:uppercase;color:#f0c897;font-weight:700;}
-#pj-timer{font-family:'JetBrains Mono',monospace;font-size:64px;font-weight:700;color:#f0c897;line-height:1;}
-#pj-timer.warning{color:#e9a05a;} #pj-timer.danger{color:#ff7b7b;animation:pulse .6s infinite alternate;}
-#proj .p-body{flex:1;overflow-y:auto;padding:36px 60px;display:flex;flex-direction:column;justify-content:center;gap:28px;max-width:1300px;width:100%;margin:0 auto;}
-#pj-text{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,52px);line-height:1.3;white-space:pre-wrap;}
-.pj-opt{display:flex;gap:18px;align-items:flex-start;font-size:clamp(22px,2.8vw,38px);line-height:1.35;padding:14px 22px;border:2px solid rgba(255,255,255,.18);border-radius:16px;}
-.pj-opt b{font-family:'JetBrains Mono',monospace;color:#f0c897;min-width:1.4em;}
-#pj-hint{font-size:clamp(18px,2vw,28px);color:#d9bfa5;}
-#proj .p-bar{display:flex;gap:10px;justify-content:center;padding:14px;border-top:1px solid rgba(255,255,255,.12);flex-wrap:wrap;}
-#proj .p-bar .btn{padding:10px 22px;font-size:14px;}
-#proj .p-bar .btn-ghost{color:#f0c897;border-color:rgba(255,255,255,.3);}
-.bulk-ta{min-height:260px;font-family:'JetBrains Mono',monospace;font-size:13px;}
-pre.fmt{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;overflow-x:auto;margin-bottom:14px;white-space:pre-wrap;}
+.portal{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.pcard{text-align:center;padding:36px 26px;}
+.pcard .ic{width:68px;height:68px;border-radius:50%;background:var(--blue-soft);border:2px solid var(--blue-line);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px;}
+.pcard h2{font-size:22px;margin-bottom:8px;} .pcard p{font-size:14px;line-height:1.6;margin-bottom:22px;min-height:68px;}
+@media(max-width:640px){.portal{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
-<div id="view-login" class="wrap" style="display:flex;align-items:center;justify-content:center;min-height:80vh;">
-  <div class="card" style="max-width:380px;width:100%;">
-    <h2 style="font-size:22px;text-align:center;margin-bottom:18px;">Quiz Builder Login</h2>
-    <div class="field"><label>Password</label><input type="password" id="pw" autocomplete="off" onkeydown="if(event.key==='Enter')login()"/></div>
-    <button class="btn btn-primary" style="width:100%;" id="btn-login" onclick="login()">Login</button>
-    <div id="login-err" class="status-msg status-err hidden"></div>
+<div class="topbar"></div>
+<div class="wrap">
+  <div style="text-align:center;margin:30px 0 28px;">
+    <span class="badge">Quiz Portal</span>
+    <h1 style="font-size:36px;margin-top:14px;">Welcome</h1>
+    <div style="font-size:15px;margin-top:6px;color:var(--muted);">Please choose how you are signing in</div>
   </div>
+  <div class="portal">
+    <div class="card pcard"><div class="ic">🎓</div><h2>Instructor Login</h2>
+      <p>Dr. Bennetta Koomson — create quizzes, see results and manage settings. Password required.</p>
+      <a href="instructor.html"><button class="btn btn-primary" style="width:100%;">Instructor Login</button></a></div>
+    <div class="card pcard"><div class="ic">🖥️</div><h2>TA Login</h2>
+      <p>Pick one of the active quizzes, project it for the class and press Start. No password needed.</p>
+      <a href="ta.html"><button class="btn btn-primary" style="width:100%;">Enter as TA</button></a></div>
+  </div>
+  <div class="info" style="margin-top:6px;text-align:center;">Students: please use the answer-sheet link or QR code shown on the projector. You do not sign in here.</div>
+  <div class="footer">©Team Benny</div>
 </div>
-
-<!-- DASHBOARD -->
-<div id="view-app" class="wrap hidden">
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <div>
-      <div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Main Panel</div>
-      <h2 style="font-size:22px;">Welcome, Dr. Bennetta Koomson</h2>
-    </div>
-    <button class="btn btn-ghost small-btn" onclick="logout()">Logout</button>
-  </div>
-
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="builder" onclick="switchTab('builder')">Quiz Builder</button>
-    <button class="tab-btn" data-tab="results" onclick="switchTab('results')">Results</button>
-  </div>
-
-  <!-- BUILDER -->
-  <div id="tab-builder">
-    <div class="card">
-      <div class="field">
-        <label>Open a quiz</label>
-        <div class="row">
-          <select id="quiz-select" style="flex:1;min-width:200px;" onchange="onSelectQuiz()"></select>
-          <button class="btn btn-ghost small-btn" onclick="startNewQuiz()">+ New quiz</button>
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div class="field"><label>Quiz Title (also the Excel tab name)</label><input type="text" id="meta-title" placeholder="e.g. METE 256 Pre-Test"/></div>
-        <div class="field"><label>Subtitle</label><input type="text" id="meta-subtitle" placeholder="e.g. Ore Beneficiation"/></div>
-      </div>
-
-      <div class="lbl">Timing</div>
-      <div class="toggle">
-        <button type="button" class="chip selected" id="mode-general" onclick="setTimeMode('general')">One general time</button>
-        <button type="button" class="chip" id="mode-per" onclick="setTimeMode('per')">Time per question</button>
-      </div>
-      <div class="grid3">
-        <div class="field" id="box-general"><label>Total time (minutes)</label><input type="number" id="meta-minutes" min="1" value="9"/></div>
-        <div class="field hidden" id="box-default"><label>Default seconds per question</label><input type="number" id="meta-defsec" min="5" value="60"/></div>
-        <div class="field"><label>Tab-switch penalty (pts)</label><input type="number" id="meta-penalty" min="0" step="0.5" value="1.5"/></div>
-      </div>
-
-      <div class="info" id="mode-info">Students get one countdown for the whole answer sheet. Questions are not shown on their phones — you project them.</div>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3 style="font-size:16px;">Questions (<span id="q-count">0</span>)</h3>
-        <div class="row">
-          <button class="btn btn-ghost small-btn" onclick="openBulk()">Bulk paste</button>
-          <button class="btn btn-primary small-btn" onclick="openEditor(null)">+ Add Question</button>
-        </div>
-      </div>
-      <div id="q-list"></div>
-
-      <div class="row" style="margin-top:20px;">
-        <button class="btn btn-success" id="btn-save" onclick="saveQuiz()">Save &amp; Create Answer Sheet Link</button>
-        <button class="btn btn-primary" onclick="launchProjector()">▶ Open Projector</button>
-      </div>
-      <div id="save-status"></div>
-    </div>
-
-    <div class="card hidden" id="share-card">
-      <h3 style="font-size:16px;margin-bottom:12px;">Answer sheet link (share with students)</h3>
-      <div class="share">
-        <div style="flex:1;min-width:240px;">
-          <div class="field"><label>Link</label><input type="text" id="share-link" readonly onclick="this.select()"/></div>
-          <div class="row">
-            <button class="btn btn-primary small-btn" onclick="copyLink()">Copy link</button>
-            <button class="btn btn-ghost small-btn" onclick="window.open(document.getElementById('share-link').value,'_blank')">Open</button>
-          </div>
-          <div class="field" style="margin-top:16px;">
-            <label>Projector link (for you — needs your login)</label>
-            <div class="row"><input type="text" id="proj-link" readonly onclick="this.select()" style="flex:1;min-width:180px;"/>
-            <button class="btn btn-ghost small-btn" onclick="window.open(document.getElementById('proj-link').value,'_blank')">Open</button></div>
-          </div>
-          <div class="field" style="margin-top:16px;">
-            <label>Answer sheet page URL (hosted <code>answer.html</code>)</label>
-            <input type="text" id="answer-base" onchange="saveBase()"/>
-          </div>
-        </div>
-        <div id="qr"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RESULTS -->
-  <div id="tab-results" class="card hidden">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
-      <h3 style="font-size:16px;">Submissions — <span id="res-title">no quiz selected</span></h3>
-      <button class="btn btn-ghost small-btn" onclick="loadResults()">Refresh</button>
-    </div>
-    <div id="results-status" style="font-size:13px;color:var(--muted);margin-bottom:12px;"></div>
-    <div class="stat-cards" id="stat-cards" style="display:none;">
-      <div class="stat-card"><div class="stat-num" id="stat-count">0</div><div class="stat-label">Submissions</div></div>
-      <div class="stat-card"><div class="stat-num" id="stat-avg">0%</div><div class="stat-label">Average</div></div>
-      <div class="stat-card"><div class="stat-num" id="stat-high">0%</div><div class="stat-label">Highest</div></div>
-    </div>
-    <div style="overflow-x:auto;">
-      <table id="results-table" style="display:none;">
-        <thead><tr><th>Rank</th><th>Name</th><th>Index</th><th>Programme</th><th>Group</th><th>Score</th><th>%</th></tr></thead>
-        <tbody id="results-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- QUESTION EDITOR -->
-<div id="editor-overlay" class="overlay hidden">
-  <div class="modal">
-    <h3 style="font-size:18px;margin-bottom:16px;" id="editor-title">Add Question</h3>
-    <div class="toggle">
-      <button type="button" class="chip selected" id="t-mcq" onclick="setEditorType('mcq')">Multiple Choice</button>
-      <button type="button" class="chip" id="t-text" onclick="setEditorType('text')">Word Answer</button>
-      <button type="button" class="chip" id="t-calc" onclick="setEditorType('calc')">Calculation</button>
-    </div>
-
-    <div class="field"><label>Question text (shown on the projector only)</label><textarea id="ed-qtext" placeholder="Type the question students will read on the screen"></textarea></div>
-    <div id="ed-mcq">
-      <div class="field"><label>Options (shown on the projector only)</label>
-        <div class="grid2">
-          <input type="text" id="ed-optA" placeholder="A"/><input type="text" id="ed-optB" placeholder="B"/>
-          <input type="text" id="ed-optC" placeholder="C"/><input type="text" id="ed-optD" placeholder="D"/>
-        </div></div>
-      <div class="field"><label>Correct Answer</label>
-        <select id="ed-correct"><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
-    </div>
-    <div id="ed-text" class="hidden">
-      <div class="field"><label>Accepted Answer(s)</label><input type="text" id="ed-correcttext" placeholder="e.g. froth flotation, flotation"/></div>
-      <div class="info">Separate multiple acceptable spellings with commas. Capitalisation and extra spaces are ignored. Students will see an empty box to type the word.</div>
-    </div>
-    <div id="ed-calc" class="hidden">
-      <label class="lbl">Correct Value · ×10^ Exponent · Unit</label>
-      <div class="row" style="margin-bottom:12px;">
-        <input type="number" id="ed-value" placeholder="Value" step="any" style="max-width:130px;"/>
-        <span>× 10^</span>
-        <input type="number" id="ed-exp" placeholder="Exp" value="0" style="max-width:90px;"/>
-        <input type="text" id="ed-unit" placeholder="Unit (kg)" style="max-width:120px;"/>
-      </div>
-      <div class="info">On the answer sheet the "× 10^exponent" and the unit are already shown beside the box — students type only the number.</div>
-      <div class="field"><label>Tolerance (%)</label><input type="number" id="ed-tol" value="5" min="0" style="max-width:140px;"/></div>
-    </div>
-
-    <div class="field hidden" id="ed-time-box"><label>Time for this question (seconds)</label><input type="number" id="ed-time" min="5" value="60" style="max-width:160px;"/></div>
-    <div class="field"><label>Admin Note (students never see this)</label><textarea id="ed-note" placeholder="Reminder of the actual question, for your reference"></textarea></div>
-
-    <div class="row" style="margin-top:10px;">
-      <button class="btn btn-primary" onclick="saveQuestion()">Save Question</button>
-      <button class="btn btn-ghost" onclick="closeEditor()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- BULK PASTE -->
-<div id="bulk-overlay" class="overlay hidden">
-  <div class="modal">
-    <h3 style="font-size:18px;margin-bottom:12px;">Bulk paste questions</h3>
-    <div class="lbl">Format — separate questions with a blank line</div>
-<pre class="fmt">1. Which process separates minerals by surface wettability?
-A. Gravity concentration
-B. Froth flotation
-C. Magnetic separation
-D. Leaching
-Answer: B
-Time: 30
-
-2. Name the reagent that makes mineral surfaces hydrophobic.
-Answer: collector, collectors
-
-3. Calculate the recovery of the concentrate.
-Answer: 2.5 x 10^3 kg
-Tol: 5</pre>
-    <div class="info">Options A–D present → multiple choice. A number answer (optionally "× 10^n" and a unit) → calculation, and the exponent and unit appear on the phone already. Anything else → word answer; separate accepted spellings with commas. "Time:" (seconds) and "Tol:" (%) are optional.</div>
-    <textarea id="bulk-text" class="bulk-ta" placeholder="Paste your questions here"></textarea>
-    <div id="bulk-status"></div>
-    <div class="row" style="margin-top:14px;">
-      <button class="btn btn-primary" onclick="applyBulk(false)">Add to quiz</button>
-      <button class="btn btn-ghost" onclick="applyBulk(true)">Replace all questions</button>
-      <button class="btn btn-ghost" onclick="$('bulk-overlay').classList.add('hidden')">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- PROJECTOR -->
-<div id="proj" class="hidden">
-  <div class="p-top">
-    <div><div class="p-title" id="pj-title"></div><div class="p-num" id="pj-num"></div></div>
-    <div id="pj-timer">--:--</div>
-  </div>
-  <div class="p-body">
-    <div id="pj-text"></div>
-    <div id="pj-opts"></div>
-    <div id="pj-hint"></div>
-  </div>
-  <div class="p-bar">
-    <button class="btn btn-success" id="pj-start" onclick="pjStart()">▶ Start quiz</button>
-    <button class="btn btn-ghost" id="pj-prev" onclick="pjStep(-1)">← Previous</button>
-    <button class="btn btn-ghost" id="pj-next" onclick="pjStep(1)">Next →</button>
-    <button class="btn btn-ghost" id="pj-end" onclick="pjFinish()">End quiz</button>
-    <button class="btn btn-ghost" onclick="closeProjector()">Close</button>
-  </div>
-</div>
-
-<script>
-/* ═════════ CONFIG ═════════ */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkyX30HvqzdWFtds4JEkK_vNi0nMjpvyjqSPat9nZZEvez7cMfkPqNtlwU4K-IsYFs/exec";
-
-let PW = sessionStorage.getItem('qb_pw') || '';
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-async function api(action, payload = {}){
-  const res = await fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // avoids CORS preflight
-    body: JSON.stringify({ action, password: PW, ...payload })
-  });
-  return res.json();
-}
-
-/* ═════════ LOGIN ═════════ */
-async function login(){
-  const err = $('login-err'), btn = $('btn-login');
-  PW = $('pw').value;
-  btn.disabled = true; btn.textContent = 'Checking…'; err.classList.add('hidden');
-  try{
-    const r = await api('verify');
-    if(r.ok){ sessionStorage.setItem('qb_pw', PW); enterApp(); }
-    else { PW=''; err.textContent = r.error || 'Incorrect password.'; err.classList.remove('hidden'); }
-  }catch(e){ PW=''; err.textContent = 'Could not reach the server: ' + e.message; err.classList.remove('hidden'); }
-  btn.disabled = false; btn.textContent = 'Login';
-}
-function logout(){ sessionStorage.removeItem('qb_pw'); PW=''; location.reload(); }
-function switchTab(t){
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===t));
-  $('tab-builder').classList.toggle('hidden', t!=='builder');
-  $('tab-results').classList.toggle('hidden', t!=='results');
-  if(t==='results') loadResults();
-}
-async function enterApp(){
-  $('view-login').classList.add('hidden'); $('view-app').classList.remove('hidden');
-  startNewQuiz();
-  await refreshQuizList();
-  if(PROJECT_ID) await openProjectorFor(PROJECT_ID);
-}
-
-/* ═════════ QUIZ STATE ═════════ */
-let quiz = blankQuiz();
-let editingId = null, editorType = 'mcq';
-function blankQuiz(){ return { id:null, title:'', subtitle:'', timeMode:'general', generalMinutes:9, defaultSeconds:60, tabPenalty:1.5, questions:[] }; }
-
-async function refreshQuizList(selectId){
-  try{
-    const r = await api('list');
-    const sel = $('quiz-select');
-    sel.innerHTML = '<option value="">— New quiz —</option>' +
-      (r.quizzes||[]).map(q => `<option value="${esc(q.id)}">${esc(q.title)}</option>`).join('');
-    sel.value = selectId || quiz.id || '';
-  }catch(e){ console.warn(e); }
-}
-function startNewQuiz(){
-  quiz = blankQuiz(); fillMeta(); renderList();
-  $('quiz-select').value = ''; $('share-card').classList.add('hidden'); $('save-status').innerHTML = '';
-}
-async function onSelectQuiz(){
-  const id = $('quiz-select').value;
-  if(!id){ startNewQuiz(); return; }
-  $('save-status').innerHTML = '<div class="status-msg">Loading…</div>';
-  try{
-    const r = await api('load', { quizId:id });
-    if(!r.ok) throw new Error(r.error);
-    quiz = r.quiz;
-    quiz.defaultSeconds = quiz.defaultSeconds || 60;
-    fillMeta(); renderList(); showShare(); $('save-status').innerHTML = '';
-  }catch(e){ $('save-status').innerHTML = `<div class="status-msg status-err">✗ ${esc(e.message)}</div>`; }
-}
-
-function fillMeta(){
-  $('meta-title').value = quiz.title; $('meta-subtitle').value = quiz.subtitle;
-  $('meta-minutes').value = quiz.generalMinutes; $('meta-defsec').value = quiz.defaultSeconds;
-  $('meta-penalty').value = quiz.tabPenalty;
-  setTimeMode(quiz.timeMode, true);
-}
-function readMeta(){
-  quiz.title = $('meta-title').value.trim(); quiz.subtitle = $('meta-subtitle').value.trim();
-  quiz.generalMinutes = parseFloat($('meta-minutes').value) || 9;
-  quiz.defaultSeconds = parseInt($('meta-defsec').value,10) || 60;
-  const p = parseFloat($('meta-penalty').value); quiz.tabPenalty = isNaN(p) ? 1.5 : p;
-}
-function setTimeMode(mode, silent){
-  quiz.timeMode = mode;
-  $('mode-general').classList.toggle('selected', mode==='general');
-  $('mode-per').classList.toggle('selected', mode==='per');
-  $('box-general').classList.toggle('hidden', mode!=='general');
-  $('box-default').classList.toggle('hidden', mode!=='per');
-  $('mode-info').textContent = mode==='general'
-    ? 'Students get one countdown for the whole answer sheet. Questions are not shown on their phones — you project them.'
-    : 'Each question has its own countdown on the student\'s phone. When it ends the sheet moves to the next question automatically and they cannot go back. Set a default here, then adjust any question individually.';
-  if(!silent) renderList();
-}
-
-/* ═════════ QUESTION LIST ═════════ */
-function renderList(){
-  $('q-count').textContent = quiz.questions.length;
-  const list = $('q-list'); list.innerHTML = '';
-  quiz.questions.forEach((q,i)=>{
-    let meta;
-    if(q.type==='mcq') meta = `Multiple Choice · correct: ${q.correct}`;
-    else if(q.type==='text') meta = `Word Answer · accepted: ${q.correctText||'—'}`;
-    else meta = `Calculation · ${q.correctValue} × 10^${q.exponent||0} ${q.unit||''} · ±${q.tolerancePct}%`;
-    if(quiz.timeMode==='per') meta += ` · ${q.time || quiz.defaultSeconds}s`;
-    const row = document.createElement('div'); row.className='admin-q-row';
-    row.innerHTML = `<div><div class="q-title">Q${i+1}${(q.text||q.note)?' — '+esc((q.text||q.note).slice(0,90)):''}</div><div class="q-meta">${esc(meta)}</div></div>
-      <div class="q-actions">
-        <button class="btn btn-ghost small-btn" onclick="moveQ(${i},-1)">↑</button>
-        <button class="btn btn-ghost small-btn" onclick="moveQ(${i},1)">↓</button>
-        <button class="btn btn-ghost small-btn" onclick="openEditor('${esc(q.id)}')">Edit</button>
-        <button class="btn btn-danger small-btn" onclick="delQ('${esc(q.id)}')">Delete</button>
-      </div>`;
-    list.appendChild(row);
-  });
-}
-function moveQ(i,d){ const j=i+d; if(j<0||j>=quiz.questions.length) return; [quiz.questions[i],quiz.questions[j]]=[quiz.questions[j],quiz.questions[i]]; renderList(); }
-function delQ(id){ if(!confirm('Delete this question?')) return; quiz.questions = quiz.questions.filter(q=>q.id!==id); renderList(); }
-
-/* ═════════ EDITOR ═════════ */
-function setEditorType(t){
-  editorType=t;
-  ['mcq','text','calc'].forEach(x=>{ $('t-'+x).classList.toggle('selected',x===t); $('ed-'+x).classList.toggle('hidden',x!==t); });
-}
-function openEditor(id){
-  readMeta();
-  editingId = id;
-  const q = id ? quiz.questions.find(x=>x.id===id) : null;
-  $('editor-title').textContent = id ? 'Edit Question' : 'Add Question';
-  setEditorType(q?.type || 'mcq');
-  $('ed-correct').value = q?.correct || 'A';
-  $('ed-correcttext').value = q?.correctText || '';
-  $('ed-value').value = q?.correctValue ?? '';
-  $('ed-exp').value = q?.exponent ?? 0;
-  $('ed-unit').value = q?.unit || '';
-  $('ed-tol').value = q?.tolerancePct ?? 5;
-  $('ed-note').value = q?.note || '';
-  $('ed-qtext').value = q?.text || '';
-  ['A','B','C','D'].forEach(L => $('ed-opt'+L).value = (q?.options||{})[L] || '');
-  $('ed-time').value = q?.time || quiz.defaultSeconds;
-  $('ed-time-box').classList.toggle('hidden', quiz.timeMode!=='per');
-  $('editor-overlay').classList.remove('hidden');
-}
-function closeEditor(){ $('editor-overlay').classList.add('hidden'); }
-function saveQuestion(){
-  const id = editingId || ('q' + Date.now().toString(36) + Math.random().toString(36).slice(2,5));
-  const note = $('ed-note').value.trim();
-  const time = Math.max(5, parseInt($('ed-time').value,10) || quiz.defaultSeconds);
-  let q;
-  const text = $('ed-qtext').value.trim();
-  if(editorType==='mcq'){ const options={}; ['A','B','C','D'].forEach(L=>{ const v=$('ed-opt'+L).value.trim(); if(v) options[L]=v; }); q = { id, type:'mcq', correct:$('ed-correct').value, options, note, time }; }
-  else if(editorType==='text'){
-    const t = $('ed-correcttext').value.trim();
-    if(!t){ alert('Enter at least one accepted answer.'); return; }
-    q = { id, type:'text', correctText:t, note, time };
-  } else {
-    const v = parseFloat($('ed-value').value);
-    if(isNaN(v)){ alert('Enter the correct numeric value.'); return; }
-    const tol = parseFloat($('ed-tol').value);
-    q = { id, type:'calc', correctValue:v, exponent:parseInt($('ed-exp').value,10)||0, unit:$('ed-unit').value.trim(),
-          tolerancePct: isNaN(tol)?5:tol, note, time };
-  }
-  q.text = text;
-  if(editingId){ const i = quiz.questions.findIndex(x=>x.id===editingId); quiz.questions[i]=q; }
-  else quiz.questions.push(q);
-  closeEditor(); renderList();
-}
-
-/* ═════════ SAVE / SHARE ═════════ */
-async function saveQuiz(){
-  readMeta();
-  const st = $('save-status');
-  if(!quiz.title){ st.innerHTML='<div class="status-msg status-err">Give the quiz a title first (it becomes the Excel tab name).</div>'; return; }
-  if(!quiz.questions.length){ st.innerHTML='<div class="status-msg status-err">Add at least one question.</div>'; return; }
-  $('btn-save').disabled = true; st.innerHTML = '<div class="status-msg">Saving and preparing the sheet…</div>';
-  try{
-    const r = await api('save', { quiz });
-    if(!r.ok) throw new Error(r.error);
-    quiz.id = r.id;
-    st.innerHTML = `<div class="status-msg status-ok">✓ Saved. Results tab in your spreadsheet: "${esc(r.sheetName)}".</div>`;
-    await refreshQuizList(r.id);
-    showShare();
-  }catch(e){ st.innerHTML = `<div class="status-msg status-err">✗ ${esc(e.message)}</div>`; }
-  $('btn-save').disabled = false;
-}
-function answerBase(){
-  return localStorage.getItem('qb_answer_base') || new URL('answer.html', location.href).href;
-}
-function saveBase(){ localStorage.setItem('qb_answer_base', $('answer-base').value.trim()); showShare(); }
-function showShare(){
-  if(!quiz.id) return;
-  $('share-card').classList.remove('hidden');
-  $('answer-base').value = answerBase();
-  const link = answerBase() + (answerBase().includes('?') ? '&' : '?') + 'quiz=' + encodeURIComponent(quiz.id);
-  $('share-link').value = link;
-  $('proj-link').value = location.origin + location.pathname + '?project=' + encodeURIComponent(quiz.id);
-  const qr = $('qr'); qr.innerHTML = '';
-  try{ new QRCode(qr, { text: link, width: 150, height: 150 }); }catch(e){ qr.style.display='none'; }
-}
-async function copyLink(){
-  const v = $('share-link').value;
-  try{ await navigator.clipboard.writeText(v); }catch(e){ $('share-link').select(); document.execCommand('copy'); }
-  $('save-status').innerHTML = '<div class="status-msg status-ok">Link copied.</div>';
-}
-
-/* ═════════ RESULTS ═════════ */
-async function loadResults(){
-  const st = $('results-status');
-  $('res-title').textContent = quiz.title || 'no quiz selected';
-  if(!quiz.id){ st.textContent = 'Open or save a quiz in the Quiz Builder tab first.'; return; }
-  st.textContent = 'Loading…';
-  try{
-    const r = await api('results', { quizId: quiz.id });
-    if(!r.ok) throw new Error(r.error);
-    const arr = r.rows || [];
-    if(!arr.length){
-      st.textContent='No submissions yet.'; $('stat-cards').style.display='none'; $('results-table').style.display='none'; return;
-    }
-    const pct = arr.map(x=>parseFloat(x.percentage)||0);
-    $('stat-count').textContent = arr.length;
-    $('stat-avg').textContent = (pct.reduce((a,b)=>a+b,0)/pct.length).toFixed(1)+'%';
-    $('stat-high').textContent = Math.max(...pct).toFixed(1)+'%';
-    $('stat-cards').style.display='grid';
-    const tb = $('results-tbody'); tb.innerHTML='';
-    [...arr].sort((a,b)=>(parseFloat(b.finalScore)||0)-(parseFloat(a.finalScore)||0)).forEach((x,i)=>{
-      const tr=document.createElement('tr');
-      [i+1,x.studentName,x.indexNumber,x.programme,x.groupNumber,`${x.finalScore}/${x.totalQuestions}`,`${x.percentage}%`].forEach(v=>{
-        const td=document.createElement('td'); td.textContent=v ?? ''; tr.appendChild(td);
-      });
-      tb.appendChild(tr);
-    });
-    $('results-table').style.display='table';
-    st.textContent = `Loaded ${arr.length} submission(s).`;
-  }catch(e){ st.textContent = 'Could not load results: ' + e.message; }
-}
-
-/* ═════════ BULK PASTE ═════════ */
-function openBulk(){ readMeta(); $('bulk-status').innerHTML=''; $('bulk-overlay').classList.remove('hidden'); }
-function parseBulk(text){
-  const blocks = text.replace(/\r/g,'').split(/\n\s*\n/).map(b=>b.trim()).filter(Boolean);
-  const out=[], errs=[];
-  blocks.forEach((b,bi)=>{
-    const lines = b.split('\n').map(l=>l.trim()).filter(Boolean);
-    let ql=[], opts={}, ans='', time=null, tol=null, type=null, cur=null, m;
-    lines.forEach(l=>{
-      if(m=l.match(/^(?:answer|ans|correct)\s*[:\-]\s*(.+)$/i)) ans=m[1].trim();
-      else if(m=l.match(/^(?:time|seconds)\s*[:\-]\s*(\d+)/i)) time=+m[1];
-      else if(m=l.match(/^(?:tol|tolerance)\s*[:\-]\s*([\d.]+)/i)) tol=+m[1];
-      else if(m=l.match(/^type\s*[:\-]\s*(\w+)/i)) type=m[1].toLowerCase();
-      else if(m=l.match(/^\(?([A-Da-d])[\)\.:]\s*(.*)$/)){ cur=m[1].toUpperCase(); opts[cur]=m[2]; }
-      else if(cur) opts[cur]+=' '+l;
-      else ql.push(l);
-    });
-    const text = ql.join('\n').replace(/^\s*(?:Q\s*)?\d+\s*[\.\)\:]\s*/i,'').trim();
-    const label = 'Block '+(bi+1);
-    if(!ans){ errs.push(label+': no "Answer:" line'); return; }
-    const id = 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2,6) + bi;
-    const q = { id, text, note:'', time: time || quiz.defaultSeconds };
-    const hasOpts = Object.keys(opts).length >= 2;
-    const calc = ans.match(/^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s*(?:[x×*]\s*10\s*\^\s*(-?\d+))?\s*(.*)$/i);
-    if(type==='mcq' || (!type && hasOpts)){
-      const L = (ans.match(/[A-Da-d]/)||[''])[0].toUpperCase();
-      if(!L){ errs.push(label+': answer must be A, B, C or D'); return; }
-      Object.assign(q,{ type:'mcq', correct:L, options:opts });
-    } else if(type==='calc' || (!type && calc)){
-      if(!calc){ errs.push(label+': could not read a number from the answer'); return; }
-      Object.assign(q,{ type:'calc', correctValue:parseFloat(calc[1]), exponent:parseInt(calc[2],10)||0, unit:(calc[3]||'').trim(), tolerancePct: tol==null?5:tol });
-    } else {
-      Object.assign(q,{ type:'text', correctText:ans });
-    }
-    out.push(q);
-  });
-  return { out, errs };
-}
-function applyBulk(replace){
-  const { out, errs } = parseBulk($('bulk-text').value);
-  const st = $('bulk-status');
-  if(errs.length){ st.innerHTML = '<div class="status-msg status-err">'+errs.map(esc).join('<br>')+'</div>'; return; }
-  if(!out.length){ st.innerHTML = '<div class="status-msg status-err">Nothing to add — paste at least one question.</div>'; return; }
-  if(replace) quiz.questions = out; else quiz.questions.push(...out);
-  $('bulk-text').value=''; $('bulk-overlay').classList.add('hidden'); renderList();
-  $('save-status').innerHTML = `<div class="status-msg status-ok">Added ${out.length} question(s). Remember to Save.</div>`;
-}
-
-/* ═════════ PROJECTOR ═════════ */
-const PROJECT_ID = new URLSearchParams(location.search).get('project');
-let pj = { idx:0, running:false, endLocal:0, busy:false, timer:null, finished:false };
-const pjPer = () => quiz.timeMode === 'per';
-
-async function launchProjector(){
-  await saveQuiz();                     // make sure students' sheet matches what is projected
-  if(quiz.id) openProjector();
-}
-async function openProjectorFor(id){
-  try{
-    const r = await api('load', { quizId:id });
-    if(!r.ok) throw new Error(r.error);
-    quiz = r.quiz; quiz.defaultSeconds = quiz.defaultSeconds || 60;
-    fillMeta(); renderList(); showShare(); openProjector();
-  }catch(e){ alert('Could not open projector: ' + e.message); }
-}
-function openProjector(){
-  if(!quiz.questions.length) return;
-  clearInterval(pj.timer);
-  pj = { idx:0, running:false, endLocal:0, busy:false, timer:null, finished:false };
-  $('proj').classList.remove('hidden');
-  $('pj-title').textContent = quiz.title;
-  $('pj-start').classList.remove('hidden'); $('pj-end').classList.add('hidden');
-  $('pj-prev').classList.toggle('hidden', pjPer()); $('pj-next').classList.add('hidden');
-  pjRender();
-  api('live', { quizId:quiz.id, status:'idle' }).catch(()=>{});
-  pj.timer = setInterval(pjTick, 250);
-}
-function closeProjector(){
-  if(pj.running && !confirm('The quiz is running. Close the projector anyway?')) return;
-  clearInterval(pj.timer); $('proj').classList.add('hidden');
-}
-function pjRender(){
-  const q = quiz.questions[pj.idx], n = quiz.questions.length;
-  $('pj-num').textContent = `Question ${pj.idx+1} of ${n}`;
-  $('pj-text').textContent = q.text || '(No question text — add it in the builder)';
-  const o = $('pj-opts'); o.innerHTML = '';
-  if(q.type==='mcq'){
-    ['A','B','C','D'].forEach(L=>{
-      if(!(q.options||{})[L]) return;
-      const d = document.createElement('div'); d.className='pj-opt';
-      const b = document.createElement('b'); b.textContent = L + '.';
-      const t = document.createElement('span'); t.textContent = q.options[L];
-      d.append(b,t); o.appendChild(d); d.style.marginBottom='12px';
-    });
-  }
-  $('pj-hint').textContent = q.type==='calc'
-    ? 'Answer is a number' + ((q.exponent||q.unit) ? ' — ' + [(q.exponent ? '× 10^'+q.exponent : ''), q.unit].filter(Boolean).join(' ') + ' already shown on your phone' : '')
-    : q.type==='text' ? 'Type your answer on your phone' : '';
-}
-async function pjGo(idx){
-  if(idx >= quiz.questions.length){ return pjFinish(); }
-  pj.idx = idx; pjRender();
-  const secs = quiz.questions[idx].time || quiz.defaultSeconds || 60;
-  pj.endLocal = Date.now() + secs*1000; pj.running = true;
-  pj.busy = true;
-  try{
-    const r = await api('live', { quizId:quiz.id, status:'running', idx, seconds:secs });
-    if(r.ok && r.state) pj.endLocal = Date.now() + (r.state.endsAt - r.now);
-  }catch(e){}
-  pj.busy = false;
-}
-async function pjStart(){
-  $('pj-start').classList.add('hidden'); $('pj-end').classList.remove('hidden');
-  if(pjPer()){ $('pj-next').classList.remove('hidden'); $('pj-next').textContent='Skip →'; await pjGo(0); }
-  else { $('pj-next').classList.remove('hidden'); $('pj-next').textContent='Next →';
-         pj.endLocal = Date.now() + quiz.generalMinutes*60000; pj.running = true; }
-}
-function pjStep(d){
-  if(pjPer()){ if(pj.running && d>0) pjGo(pj.idx+1); return; }
-  const n = pj.idx + d;
-  if(n<0 || n>=quiz.questions.length) return;
-  pj.idx = n; pjRender();
-}
-async function pjFinish(){
-  pj.running = false; pj.finished = true;
-  $('pj-text').textContent = 'Time is up — the quiz has ended.'; $('pj-opts').innerHTML=''; $('pj-hint').textContent='';
-  $('pj-timer').textContent='0:00'; $('pj-next').classList.add('hidden'); $('pj-end').classList.add('hidden');
-  try{ await api('live', { quizId:quiz.id, status:'finished' }); }catch(e){}
-}
-function pjTick(){
-  const el = $('pj-timer');
-  if(!pj.running){ if(!pj.finished && !pj.endLocal) el.textContent = pjPer() ? '--:--' : quiz.generalMinutes+':00'; return; }
-  const rem = Math.max(0, Math.ceil((pj.endLocal - Date.now())/1000));
-  el.textContent = `${Math.floor(rem/60)}:${String(rem%60).padStart(2,'0')}`;
-  const warn = pjPer() ? 5 : 60, dang = pjPer() ? 3 : 30;
-  el.classList.toggle('danger', rem<=dang); el.classList.toggle('warning', rem>dang && rem<=warn);
-  if(rem<=0 && !pj.busy){
-    if(pjPer()) pjGo(pj.idx+1); else pjFinish();
-  }
-}
-document.addEventListener('keydown', e=>{
-  if($('proj').classList.contains('hidden')) return;
-  if(e.key==='ArrowRight') pjStep(1); else if(e.key==='ArrowLeft') pjStep(-1);
-});
-
-/* ═════════ INIT ═════════ */
-(async function(){
-  if(PW){
-    try{ const r = await api('verify'); if(r.ok){ enterApp(); return; } }catch(e){}
-    PW=''; sessionStorage.removeItem('qb_pw');
-  }
-})();
-</script>
 </body>
 </html>
