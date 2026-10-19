@@ -84,9 +84,9 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--s
 #pj-welcome .sub{font-size:clamp(20px,2.6vw,34px);color:var(--muted);}
 #pj-welcome .inst{font-size:clamp(22px,3vw,40px);font-weight:700;border-top:3px solid var(--blue);padding-top:18px;margin-top:6px;}
 #pj-welcome .meta{font-size:clamp(16px,1.8vw,24px);}
-#pj-join{display:flex;align-items:center;gap:22px;margin-top:10px;background:var(--surface2);border:2px solid var(--border);border-radius:18px;padding:16px 24px;}
-#pj-join #pj-qr{background:#fff;padding:8px;border-radius:10px;}
-#pj-join .t{font-size:16px;text-align:left;max-width:360px;word-break:break-all;}
+#pj-join{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6px;}
+#pj-join #pj-qr{background:#fff;padding:14px;border:3px solid var(--blue);border-radius:18px;line-height:0;}
+#pj-join .t{font-size:clamp(16px,1.8vw,24px);font-weight:700;}
 #proj .p-bar{display:flex;gap:10px;justify-content:center;padding:14px;border-top:2px solid var(--blue-soft);flex-wrap:wrap;background:#fff;}
 #proj .p-bar .btn{padding:11px 24px;font-size:15px;}
 </style>
@@ -124,7 +124,7 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--s
       <div class="sub" id="w-sub"></div>
       <div class="inst">Instructor: Dr. Bennetta Koomson</div>
       <div class="meta" id="w-meta"></div>
-      <div id="pj-join"><div id="pj-qr"></div><div class="t"><b>Join on your phone</b><br><span id="pj-link"></span></div></div>
+      <div id="pj-join"><div id="pj-qr"></div><div class="t">Scan to join — questions appear here, answers on your phone</div></div>
     </div>
     <div id="pj-q" class="hidden">
       <div id="pj-text"></div>
@@ -193,8 +193,9 @@ function openProjector(){
     ? `${n} questions · each question is timed (${fmtT(quiz.questions.reduce((a,q)=>a+(q.time||0),0))} in total)`
     : `${n} questions · ${quiz.generalMinutes} minute(s) in total`;
   const link = here('answer.html') + '?quiz=' + encodeURIComponent(quiz.id);
-  $('pj-link').textContent = link;
-  const qr = $('pj-qr'); qr.innerHTML = ''; try{ new QRCode(qr, { text: link, width: 130, height: 130 }); }catch(e){}
+  const qr = $('pj-qr'); qr.innerHTML = '';
+  const qs = Math.round(Math.max(220, Math.min(window.innerHeight*0.5, window.innerWidth*0.8, 520)));
+  try{ new QRCode(qr, { text: link, width: qs, height: qs, correctLevel: QRCode.CorrectLevel.M }); }catch(e){}
   $('pj-start').classList.remove('hidden');
   ['pj-prev','pj-next','pj-end'].forEach(i=>$(i).classList.add('hidden'));
   post('live', { quizId:quiz.id, status:'idle' }).catch(()=>{});
@@ -226,15 +227,21 @@ function pjRender(){
     ? 'Answer is a number' + ((q.exponent||q.unit) ? ' — ' + [(q.exponent ? '× 10^'+q.exponent : ''), q.unit].filter(Boolean).join(' ') + ' is already shown on your phone' : '')
     : q.type==='text' ? 'Type your answer on your phone' : '';
 }
+async function goLive(idx, secs){
+  try{
+    const t0 = Date.now();
+    const r = await post('live', { quizId:quiz.id, status:'running', idx, seconds:secs });
+    const t1 = Date.now();
+    // align the projector clock with the server clock (same one phones use), RTT-corrected
+    if(r.ok && r.state) pj.endLocal = r.state.endsAt - (r.now - (t0+t1)/2);
+  }catch(e){}
+}
 async function pjGo(idx){
   if(idx >= quiz.questions.length){ return pjFinish(); }
   pj.idx = idx; pjRender();
   const secs = quiz.questions[idx].time || 60;
   pj.endLocal = Date.now() + secs*1000; pj.running = true; pj.busy = true;
-  try{
-    const r = await post('live', { quizId:quiz.id, status:'running', idx, seconds:secs });
-    if(r.ok && r.state) pj.endLocal = Date.now() + (r.state.endsAt - r.now);
-  }catch(e){}
+  await goLive(idx, secs);
   pj.busy = false;
 }
 async function pjStart(){
@@ -242,7 +249,9 @@ async function pjStart(){
   $('pj-start').classList.add('hidden'); $('pj-end').classList.remove('hidden'); $('pj-next').classList.remove('hidden');
   if(pjPer()){ $('pj-next').textContent = 'Skip →'; await pjGo(0); }
   else { $('pj-prev').classList.remove('hidden'); $('pj-next').textContent = 'Next →';
-         pj.idx = 0; pjRender(); pj.endLocal = Date.now() + quiz.generalMinutes*60000; pj.running = true; }
+         pj.idx = 0; pjRender(); const secs = Math.round(quiz.generalMinutes*60);
+         pj.endLocal = Date.now() + secs*1000; pj.running = true; pj.busy = true;
+         await goLive(0, secs); pj.busy = false; }
 }
 function pjStep(d){
   if(pj.phase!=='quiz') return;
