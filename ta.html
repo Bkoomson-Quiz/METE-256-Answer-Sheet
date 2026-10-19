@@ -197,6 +197,17 @@ function paintBar(barEl, rem, total){
   if(red && rem!==_lastBeep){ _lastBeep=rem; beep(); }
   if(!red) _lastBeep=-1;
 }
+
+/* schedule → position. t = server-clock seconds since startAt; returns {idx, rem, total} or {done:true} */
+function schedPos(st, serverNowMs){
+  const t = (serverNowMs - st.startAt)/1000; let acc = 0;
+  for(let i=0;i<st.durs.length;i++){
+    const d = st.durs[i];
+    if(t < acc + d) return { idx:i, rem: Math.max(0, Math.ceil(acc + d - t)), total:d };
+    acc += d;
+  }
+  return { done:true };
+}
 let quiz = null;
 let pj = { phase:'welcome', idx:0, running:false, endLocal:0, busy:false, timer:null };
 const pjPer = () => quiz.timeMode === 'per';
@@ -221,7 +232,7 @@ function openProjector(){
   $('pj-start').classList.remove('hidden');
   ['pj-prev','pj-next','pj-end'].forEach(i=>$(i).classList.add('hidden'));
   post('live', { quizId:quiz.id, status:'idle' }).catch(()=>{});
-  pj.timer = setInterval(pjTick, 250);
+  pj.timer = setInterval(pjTick, 100);
 }
 function closeProjector(){
   if(pj.running && !confirm('The quiz is running. Close the projector anyway?')) return;
@@ -249,21 +260,25 @@ function pjRender(){
     ? 'Answer is a number' + ((q.exponent||q.unit) ? ' — ' + [(q.exponent ? '× 10^'+q.exponent : ''), q.unit].filter(Boolean).join(' ') + ' is already shown on your phone' : '')
     : q.type==='text' ? 'Type your answer on your phone' : '';
 }
-async function goLive(idx, secs){
+const bestOffset = { v:0, rtt:Infinity };
+const sNow = () => Date.now() + bestOffset.v;
+const durations = () => pjPer() ? quiz.questions.map(q => q.time || 60) : [Math.round(quiz.generalMinutes*60)];
+async function goLive(skipTo){
+  // one POST publishes the whole schedule; the projector and every phone then follow the same server clock
   try{
     const t0 = Date.now();
-    const r = await post('live', { quizId:quiz.id, status:'running', idx, seconds:secs });
+    const r = await post('live', { quizId:quiz.id, status:'running', durs:durations(), skipTo:skipTo||0 });
     const t1 = Date.now();
-    // align the projector clock with the server clock (same one phones use), RTT-corrected
-    if(r.ok && r.state) pj.endLocal = r.state.endsAt - (r.now - (t0+t1)/2);
-  }catch(e){}
+    if(r.ok && r.state){
+      bestOffset.v = r.state.now - (t0+t1)/2; bestOffset.rtt = t1-t0;
+      pj.sched = { durs:r.state.durs, startAt:r.state.startAt };
+    }
+  }catch(e){ pj.sched = { durs:durations(), startAt: Date.now() - (durations().slice(0,skipTo||0).reduce((a,b)=>a+b,0))*1000 }; }
 }
 async function pjGo(idx){
   if(idx >= quiz.questions.length){ return pjFinish(); }
-  pj.idx = idx; pjRender();
-  const secs = quiz.questions[idx].time || 60;
-  pj.endLocal = Date.now() + secs*1000; pj.total = secs; pj.running = true; pj.busy = true;
-  await goLive(idx, secs);
+  pj.idx = idx; pjRender(); pj.running = true; pj.busy = true;
+  await goLive(idx);
   pj.busy = false;
 }
 async function pjStart(){
@@ -272,9 +287,7 @@ async function pjStart(){
   $('pj-start').classList.add('hidden'); $('pj-end').classList.remove('hidden'); $('pj-next').classList.remove('hidden');
   if(pjPer()){ $('pj-next').textContent = 'Skip →'; await pjGo(0); }
   else { $('pj-prev').classList.remove('hidden'); $('pj-next').textContent = 'Next →';
-         pj.idx = 0; pjRender(); const secs = Math.round(quiz.generalMinutes*60);
-         pj.endLocal = Date.now() + secs*1000; pj.total = secs; pj.running = true; pj.busy = true;
-         await goLive(0, secs); pj.busy = false; }
+         pj.idx = 0; pjRender(); pj.running = true; pj.busy = true; await goLive(0); pj.busy = false; }
 }
 function pjStep(d){
   if(pj.phase!=='quiz') return;
@@ -293,13 +306,14 @@ async function pjFinish(){
   try{ await post('live', { quizId:quiz.id, status:'finished' }); }catch(e){}
 }
 function pjTick(){
-  if(!pj.running) return;
+  if(!pj.running || !pj.sched || pj.busy) return;
   const el = $('pj-timer');
-  const rem = Math.max(0, Math.ceil((pj.endLocal - Date.now())/1000));
-  el.textContent = fmtT(rem); paintBar($('pj-tbar-i'), rem, pj.total||1);
-  const fr = rem/(pj.total||1);
+  const p = schedPos(pj.sched, sNow());
+  if(p.done){ if(!pj.busy){ pj.busy = true; pjFinish(); } return; }
+  if(pjPer() && p.idx !== pj.idx){ pj.idx = p.idx; pjRender(); }          // auto-advance on the shared clock
+  el.textContent = fmtT(p.rem); paintBar($('pj-tbar-i'), p.rem, p.total);
+  const fr = p.rem/p.total;
   el.classList.toggle('danger', fr<=0.25); el.classList.toggle('warning', fr>0.25 && fr<=0.5);
-  if(rem<=0 && !pj.busy){ if(pjPer()) pjGo(pj.idx+1); else pjFinish(); }
 }
 document.addEventListener('keydown', e=>{
   if($('proj').classList.contains('hidden')) return;
