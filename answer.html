@@ -151,9 +151,9 @@ let cfg = null;
     $('reg-subtitle').textContent = cfg.subtitle || '';
     const n = cfg.questions.length, pen = cfg.tabPenalty;
     const timing = cfg.timeMode==='per'
-      ? `each question has its own timer and moves on automatically (${fmt(cfg.questions.reduce((a,q)=>a+(q.time||0),0))} total)`
+      ? `each question is timed and moves on automatically (${fmt(cfg.questions.reduce((a,q)=>a+(q.time||0),0))} total)`
       : `total time: ${cfg.generalMinutes} minute(s)`;
-    $('reg-info').textContent = `${n} questions · questions are shown on the projector, not on this screen · ${timing} · tab switch = −${pen} pts`;
+    $('reg-info').textContent = `${n} questions · shown on the projector, not here · ${timing} · the sheet opens when the instructor starts the quiz · tab switch = −${pen} pts`;
     showView('reg');
   }catch(e){ $('loading-text').textContent = 'Could not load this quiz: ' + e.message; }
 })();
@@ -176,9 +176,30 @@ document.querySelectorAll('#prog-grid .chip').forEach(b => b.onclick = () => {
 /* ═════════ STATE ═════════ */
 let studentName='', indexNumber='';
 let answers = {}, tabSwitches = 0, submitted = false, running = false;
-let timerInterval = null, timeLeft = 0, startedAt = 0, curIdx = 0;
+let startedAt = 0, curIdx = 0;
+let live = null, liveOffset = 0, shownIdx = -1, sheetBuilt = false, livePollTimer = null, liveDisplayTimer = null;
+const isPer = () => cfg.timeMode === 'per';
 
 function regError(msg){ const e=$('reg-err'); e.textContent=msg; e.classList.remove('hidden'); }
+
+/* server clock helpers: offset = serverTime - localTime, measured at the midpoint of the request */
+async function fetchLive(){
+  const t0 = Date.now();
+  const r = await (await fetch(`${SCRIPT_URL}?action=live&quiz=${encodeURIComponent(QUIZ_ID)}`, {cache:'no-store'})).json();
+  const t1 = Date.now();
+  if(r.ok && r.state){ live = r.state; liveOffset = (r.state.now || t1) - (t0 + t1)/2; }
+  return live;
+}
+const remaining = () => Math.max(0, Math.ceil((live.endsAt - (Date.now() + liveOffset))/1000));
+function liveEnded(st){
+  if(!st) return false;
+  if(st.status==='finished') return true;
+  if(st.status==='running'){
+    const rem = (st.endsAt - (Date.now() + liveOffset))/1000;
+    return rem <= 0 && (!isPer() || st.idx >= cfg.questions.length-1);
+  }
+  return false;
+}
 
 async function beginQuiz(){
   $('reg-err').classList.add('hidden');
@@ -193,44 +214,72 @@ async function beginQuiz(){
       btn.disabled=false; btn.textContent='Start →'; return;
     }
   }catch(e){ console.warn('Duplicate check failed — the server will re-check on submit.', e); }
+  try{
+    const st = await fetchLive();
+    if(liveEnded(st)){ regError('This quiz has already ended.'); btn.disabled=false; btn.textContent='Start →'; return; }
+  }catch(e){}
 
   studentName = name; indexNumber = idx;
-  answers = {}; tabSwitches = 0; submitted = false; curIdx = 0; running = true;
+  answers = {}; tabSwitches = 0; submitted = false; curIdx = 0; running = false; shownIdx = -1; sheetBuilt = false;
   $('disp-name').textContent = studentName;
   $('disp-meta').textContent = `${indexNumber} · ${programme} · ${groupNumber}`;
-
-  buildSheet();
+  $('timer-label').textContent = isPer() ? 'This Question' : 'Time Remaining';
+  $('timer-display').textContent = '--:--';
+  $('btn-action').classList.add('hidden');
+  showWaiting();
   showView('quiz');
-  startedAt = Date.now();
-  if(cfg.timeMode==='per'){
-    $('timer-label').textContent = 'This Question';
-    $('btn-action').classList.add('hidden');
-    $('timer-display').textContent = '--:--';
-    startLive();
-  } else {
-    timeLeft = Math.round(cfg.generalMinutes*60);
-    tick(true);
-    timerInterval = setInterval(tick, 1000);
-  }
+  pollLive();
+  liveDisplayTimer = setInterval(liveTick, 250);
 
   document.addEventListener('contextmenu', e=>e.preventDefault());
   document.addEventListener('copy', e=>e.preventDefault());
   document.addEventListener('cut', e=>e.preventDefault());
 }
 
-/* ═════════ TIMER ═════════ */
-function tick(first){
-  if(!first) timeLeft--;
+function showWaiting(){
+  $('answer-grid').innerHTML = '<div class="single-q"><div style="font-size:42px;margin-bottom:10px;">⏳</div><div style="font-weight:700;">Waiting for the quiz to start…</div><div style="font-size:13px;color:var(--muted);margin-top:8px;">Keep this page open. The questions appear on the projector and your answer sheet opens automatically.</div></div>';
+  $('submit-note').textContent = '';
+  $('progress-text').innerHTML = 'Waiting…';
+}
+
+/* ═════════ FOLLOW THE PROJECTOR ═════════ */
+async function pollLive(){
+  if(submitted) return;
+  let delay = 3000;
+  try{ await fetchLive(); }catch(e){}
+  if(live && live.status==='running'){
+    const rem = (live.endsAt - (Date.now()+liveOffset))/1000;
+    delay = rem > 6 ? Math.min(5000, (rem-5)*1000) : 1000;
+  }
+  livePollTimer = setTimeout(pollLive, delay + Math.random()*500);
+}
+
+function liveTick(){
+  if(submitted || !live) return;
   const el = $('timer-display');
-  el.textContent = fmt(Math.max(0,timeLeft));
+  if(live.status==='finished'){ stopLive(); submitQuiz(); return; }
+  if(live.status!=='running'){ el.textContent = '--:--'; return; }
+
+  if(!running){ running = true; startedAt = Date.now(); }       // quiz is live: timer + tab rules start now
+  const rem = remaining();
+  if(isPer()){
+    if(live.idx !== shownIdx){
+      shownIdx = live.idx; curIdx = Math.min(live.idx, cfg.questions.length-1);
+      renderCurrent();
+    }
+  } else if(!sheetBuilt){
+    sheetBuilt = true; renderFullSheet();
+  }
+  el.textContent = fmt(rem);
   el.classList.remove('warning','danger');
-  const warnAt = cfg.timeMode==='per' ? 5 : 60, dangerAt = cfg.timeMode==='per' ? 3 : 30;
-  if(timeLeft<=dangerAt) el.classList.add('danger'); else if(timeLeft<=warnAt) el.classList.add('warning');
-  if(timeLeft<=0){
-    if(cfg.timeMode==='per' && curIdx < cfg.questions.length-1) goNext();
-    else { clearInterval(timerInterval); submitQuiz(); }
+  const warnAt = isPer() ? 5 : 60, dangerAt = isPer() ? 3 : 30;
+  if(rem<=dangerAt) el.classList.add('danger'); else if(rem<=warnAt) el.classList.add('warning');
+  if(rem<=0){
+    document.querySelectorAll('#answer-grid input').forEach(i => i.disabled = true);   // time is up: cut off
+    if(!isPer() || live.idx >= cfg.questions.length-1){ stopLive(); setTimeout(submitQuiz, 600); }
   }
 }
+function stopLive(){ clearInterval(liveDisplayTimer); clearTimeout(livePollTimer); }
 
 document.addEventListener('visibilitychange', () => {
   if(document.hidden && running && !submitted){
@@ -272,76 +321,28 @@ function rowFor(q, i, single){
   return row;
 }
 
-function buildSheet(){
+function renderFullSheet(){            // one general time: the whole sheet opens when the TA starts
   const grid = $('answer-grid'); grid.innerHTML = '';
-  if(cfg.timeMode==='per'){
-    grid.innerHTML = '<div class="single-q" id="wait-msg"><div style="font-size:42px;margin-bottom:10px;">⏳</div><div style="font-weight:700;color:var(--brown-deep);">Waiting for the instructor to start…</div><div style="font-size:13px;color:var(--muted);margin-top:8px;">Keep this page open. Questions appear on the projector.</div></div>';
-    $('submit-note').textContent = 'The question and timer follow the projector. You can\'t go back to a previous question.';
-  } else {
-    cfg.questions.forEach((q,i) => grid.appendChild(rowFor(q,i,false)));
-    $('submit-note').textContent = 'Follow along with the questions on screen. Review before submitting — you can\'t change answers after.';
-    $('btn-action').textContent = 'Submit Answers';
-  }
+  cfg.questions.forEach((q,i) => grid.appendChild(rowFor(q,i,false)));
+  $('submit-note').textContent = 'Follow along with the questions on screen. The sheet closes automatically when the time ends.';
+  $('btn-action').textContent = 'Submit Answers'; $('btn-action').classList.remove('hidden');
   updateProgress();
 }
-function renderCurrent(){
+function renderCurrent(){              // per-question mode: only the question that is live on the projector
   const grid = $('answer-grid'); grid.innerHTML = '';
   grid.appendChild(rowFor(cfg.questions[curIdx], curIdx, true));
-  const last = curIdx === cfg.questions.length-1;
-  $('btn-action').textContent = last ? 'Submit Answers' : 'Next →';
-  $('submit-note').textContent = 'Each question has its own timer. You can\'t go back to a previous question.';
+  $('submit-note').textContent = 'Each question has its own timer and moves on automatically. You can\'t go back.';
+  $('btn-action').classList.add('hidden');
   updateProgress();
 }
-/* ── per-question mode: follow the projector ── */
-let live = null, liveOffset = 0, shownIdx = -1, livePollTimer = null, liveDisplayTimer = null;
-function startLive(){
-  pollLive();
-  liveDisplayTimer = setInterval(liveTick, 250);
-}
-async function pollLive(){
-  if(submitted) return;
-  let delay = 4000;
-  try{
-    const r = await (await fetch(`${SCRIPT_URL}?action=live&quiz=${encodeURIComponent(QUIZ_ID)}`)).json();
-    if(r.ok){ live = r.state; liveOffset = (r.state.now || Date.now()) - Date.now(); }
-  }catch(e){}
-  if(live && live.status==='running'){
-    const rem = (live.endsAt - (Date.now()+liveOffset))/1000;
-    delay = rem > 6 ? Math.min(5000, (rem-5)*1000) : 1200;
-  } else if(live && live.status==='idle') delay = 2500;
-  livePollTimer = setTimeout(pollLive, delay + Math.random()*400);
-}
-function liveTick(){
-  if(submitted || !live) return;
-  if(live.status==='finished'){ clearInterval(liveDisplayTimer); clearTimeout(livePollTimer); submitQuiz(); return; }
-  if(live.status!=='running') return;
-  if(live.idx !== shownIdx){
-    shownIdx = live.idx; curIdx = Math.min(live.idx, cfg.questions.length-1);
-    renderCurrent(); $('btn-action').classList.add('hidden');
-  }
-  const rem = Math.max(0, Math.ceil((live.endsAt - (Date.now()+liveOffset))/1000));
-  timeLeft = rem;
-  const el = $('timer-display');
-  el.textContent = fmt(rem);
-  el.classList.remove('warning','danger');
-  if(rem<=3) el.classList.add('danger'); else if(rem<=5) el.classList.add('warning');
-}
-function goNext(){
-  curIdx++;
-  timeLeft = cfg.questions[curIdx].time || 60;
-  renderCurrent(); tick(true);
-}
-function onAction(){
-  if(cfg.timeMode==='per' && curIdx < cfg.questions.length-1) goNext();
-  else submitQuiz();
-}
+function onAction(){ submitQuiz(); }
 function mark(qid){
   const row = $('row-'+qid); if(row) row.classList.toggle('answered', answers[qid] !== undefined);
   updateProgress();
 }
 function updateProgress(){
   const n = cfg.questions.length, done = Object.keys(answers).length;
-  $('progress-text').innerHTML = cfg.timeMode==='per'
+  $('progress-text').innerHTML = isPer()
     ? `Question <b>${curIdx+1}</b> / ${n}` : `<b>${done}</b> / ${n} answered`;
 }
 
@@ -361,8 +362,8 @@ function reviewFor(pct){
 async function submitQuiz(){
   if(submitted) return;
   submitted = true; running = false;
-  clearInterval(timerInterval);
-  const btn = $('btn-action'); btn.disabled = true; btn.textContent = 'Submitting…';
+  stopLive();
+  const btn = $('btn-action'); btn.classList.remove('hidden'); btn.disabled = true; btn.textContent = 'Submitting…';
 
   const payload = {
     action:'submit', quizId: QUIZ_ID, studentName, indexNumber, programme, groupNumber,
