@@ -147,17 +147,11 @@ pre.fmt{background:var(--surface2);border:1.5px solid var(--border);border-radiu
           <div class="field"><label>Quiz Title (also the Excel tab name)</label><input type="text" id="meta-title" placeholder="e.g. METE 256 Pre-Test"/></div>
           <div class="field"><label>Subtitle</label><input type="text" id="meta-subtitle" placeholder="e.g. Ore Beneficiation"/></div>
         </div>
-        <div class="lbl">Timing</div>
-        <div class="toggle">
-          <button type="button" class="chip selected" id="mode-general" onclick="setTimeMode('general')">One general time</button>
-          <button type="button" class="chip" id="mode-per" onclick="setTimeMode('per')">Time per question</button>
-        </div>
         <div class="grid3">
-          <div class="field" id="box-general"><label>Total time (minutes)</label><input type="number" id="meta-minutes" min="1" value="9"/></div>
-          <div class="field hidden" id="box-default"><label>Default seconds per question</label><input type="number" id="meta-defsec" min="5" value="60"/></div>
+          <div class="field" id="box-default"><label>Default seconds per question</label><input type="number" id="meta-defsec" min="5" value="60"/></div>
           <div class="field"><label>Tab-switch penalty (pts)</label><input type="number" id="meta-penalty" min="0" step="0.5" value="1.5"/></div>
         </div>
-        <div class="info" id="mode-info"></div>
+        <div class="info" id="mode-info">Every question has its own countdown. The TA starts the quiz from the projector; every phone follows it question by question and students cannot go back. Set a default here, then adjust any question's time.</div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
           <h3 style="font-size:16px;">Questions (<span id="q-count">0</span>)</h3>
           <div class="row"><button class="btn btn-ghost small-btn" onclick="openBulk()">Bulk paste</button>
@@ -357,7 +351,7 @@ async function refreshList(){
   const tb = $('o-body'); tb.innerHTML = '';
   quizzes.forEach(q=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${esc(q.title)}</b><div style="font-size:12px;color:var(--muted);">${esc(q.subtitle||'')}${q.timeMode==='per'?' · timer per question':' · one general time'}</div></td>
+    tr.innerHTML = `<td><b>${esc(q.title)}</b><div style="font-size:12px;color:var(--muted);">${esc(q.subtitle||'')} · timer per question</div></td>
       <td>${q.questions}</td><td>${q.submissions}</td>
       <td><label class="switch"><input type="checkbox" ${q.active?'checked':''} onchange="toggleActive('${esc(q.id)}', this.checked)"><i></i></label></td>
       <td style="white-space:nowrap;"><button class="btn btn-ghost small-btn" onclick="editQuiz('${esc(q.id)}')">Edit</button>
@@ -376,7 +370,7 @@ function viewResults(id){ nav('results'); $('res-select').value = id; loadResult
 /* ═════════ QUIZ STATE ═════════ */
 let quiz = blankQuiz();
 let editingId = null, editorType = 'mcq';
-function blankQuiz(){ return { id:null, title:'', subtitle:'', timeMode:'general', generalMinutes:9, defaultSeconds:60, tabPenalty:1.5, questions:[] }; }
+function blankQuiz(){ return { id:null, title:'', subtitle:'', timeMode:'per', generalMinutes:9, defaultSeconds:60, tabPenalty:1.5, questions:[] }; }
 function newQuiz(silent){
   quiz = blankQuiz(); fillMeta(); renderList();
   $('share-card').classList.add('hidden'); $('save-status').innerHTML = '';
@@ -393,25 +387,17 @@ async function editQuiz(id){
 }
 function fillMeta(){
   $('meta-title').value = quiz.title; $('meta-subtitle').value = quiz.subtitle;
-  $('meta-minutes').value = quiz.generalMinutes; $('meta-defsec').value = quiz.defaultSeconds;
+  $('meta-defsec').value = quiz.defaultSeconds;
   $('meta-penalty').value = quiz.tabPenalty;
   setTimeMode(quiz.timeMode, true);
 }
 function readMeta(){
   quiz.title = $('meta-title').value.trim(); quiz.subtitle = $('meta-subtitle').value.trim();
-  quiz.generalMinutes = parseFloat($('meta-minutes').value) || 9;
   quiz.defaultSeconds = parseInt($('meta-defsec').value,10) || 60;
   const p = parseFloat($('meta-penalty').value); quiz.tabPenalty = isNaN(p) ? 1.5 : p;
 }
 function setTimeMode(mode, silent){
-  quiz.timeMode = mode;
-  $('mode-general').classList.toggle('selected', mode==='general');
-  $('mode-per').classList.toggle('selected', mode==='per');
-  $('box-general').classList.toggle('hidden', mode!=='general');
-  $('box-default').classList.toggle('hidden', mode!=='per');
-  $('mode-info').textContent = mode==='general'
-    ? 'One countdown for the whole answer sheet, starting when the student logs in. Questions are never shown on phones — the TA projects them.'
-    : 'Each question has its own countdown. The TA starts the quiz from the projector; every phone follows it question by question and students cannot go back. Set a default, then adjust any question.';
+  quiz.timeMode = 'per';           // every question is timed individually
   if(!silent) renderList();
 }
 
