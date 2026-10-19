@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Answer Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#fdf8f3; --surface:#fff; --surface2:#f5ede3; --border:#e2cdb8;
+  --brown-deep:#3d1f0d; --brown-mid:#7b4a2d; --warning:#c2763a; --danger:#9b3030; --success:#4a7c59;
+  --text:#2a1408; --text-mid:#5c3520; --muted:#9c7a64; --shadow:0 4px 32px rgba(61,31,13,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-user-select:none;user-select:none;}
+input{-webkit-user-select:text;user-select:text;}
+.hidden{display:none !important;}
+.wrap{max-width:640px;margin:0 auto;padding:20px 14px 40px;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:28px;}
+h1,h2{font-family:'Playfair Display',serif;color:var(--brown-deep);}
+.badge{display:inline-block;background:rgba(123,74,45,.12);border:1.5px solid rgba(123,74,45,.3);color:var(--brown-mid);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:30px;}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--brown-mid);margin-bottom:7px;}
+input[type=text],input[type=number]{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);outline:none;}
+input:focus{border-color:var(--brown-mid);box-shadow:0 0 0 3px rgba(123,74,45,.12);}
+.btn{cursor:pointer;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:16px;padding:14px 26px;}
+.btn-primary{background:linear-gradient(135deg,#7b4a2d,#5c3520);color:#fff;}
+.btn-success{background:linear-gradient(135deg,#4a7c59,#366044);color:#fff;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.chip-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.chip-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.chip{padding:12px 6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;text-align:center;}
+.chip.selected{border-color:var(--brown-mid);background:var(--brown-mid);color:#fff;}
+.info{background:rgba(194,118,58,.08);border:1.5px solid rgba(194,118,58,.3);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--brown-mid);line-height:1.6;margin-bottom:20px;}
+.err{background:rgba(155,48,48,.1);color:var(--danger);border:1px solid rgba(155,48,48,.3);border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:16px;}
+.footer{text-align:center;margin-top:24px;font-size:12px;color:var(--muted);letter-spacing:1px;}
+
+.sheet-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow);position:sticky;top:8px;z-index:10;}
+.student-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--brown-deep);}
+.student-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.timer-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:center;}
+#timer-display{font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:700;color:var(--brown-mid);text-align:center;line-height:1;}
+#timer-display.warning{color:var(--warning);}
+#timer-display.danger{color:var(--danger);animation:pulse .6s infinite alternate;}
+@keyframes pulse{from{opacity:1}to{opacity:.5}}
+.tab-warning{font-size:11px;color:var(--danger);font-family:'JetBrains Mono',monospace;background:rgba(155,48,48,.1);border:1px solid rgba(155,48,48,.3);border-radius:8px;padding:4px 10px;display:none;margin-top:4px;}
+.tab-warning.visible{display:block;}
+
+.grid-container{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);}
+.grid-title{padding:14px 20px;background:var(--brown-deep);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);display:flex;justify-content:space-between;}
+.grid-title b{font-family:'JetBrains Mono',monospace;color:#f0c897;font-weight:600;}
+.q-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(226,205,184,.5);}
+.q-row:last-child{border-bottom:none;}
+.q-row.answered{background:rgba(74,124,89,.06);}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--muted);width:40px;flex-shrink:0;}
+.q-widget{flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.mcq-opts{display:flex;gap:8px;}
+.mcq-opts input{display:none;}
+.mcq-opts label{width:48px;height:48px;border-radius:10px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--muted);cursor:pointer;}
+.mcq-opts input:checked+label{border-color:var(--brown-mid);background:var(--brown-mid);color:#fff;}
+.q-widget input[type=text],.q-widget input[type=number]{max-width:230px;}
+.unit-tag{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--brown-mid);background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;white-space:nowrap;}
+.single-q{padding:34px 20px;text-align:center;}
+.single-q .q-num{width:auto;font-size:22px;margin-bottom:20px;}
+.single-q .q-widget{justify-content:center;}
+.submit-area{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap;}
+.submit-note{font-size:13px;color:var(--muted);flex:1;min-width:180px;}
+</style>
+</head>
+<body>
+
+<!-- LOADING / ERROR -->
+<div id="view-loading" class="wrap"><div class="card" style="text-align:center;" id="loading-text">Loading answer sheet…</div></div>
+
+<!-- REGISTRATION -->
+<div id="view-reg" class="wrap hidden">
+  <div class="card">
+    <div style="text-align:center;margin-bottom:24px;">
+      <span class="badge" id="reg-badge">Quiz</span>
+      <h1 style="font-size:30px;margin-top:14px;">Answer Sheet</h1>
+      <div style="color:var(--muted);font-size:14px;margin-top:4px;" id="reg-subtitle"></div>
+    </div>
+    <div class="info" id="reg-info"></div>
+    <div id="reg-err" class="err hidden"></div>
+    <div class="field"><label>Full Name</label><input type="text" id="reg-name" autocomplete="off"/></div>
+    <div class="field"><label>Index Number</label><input type="text" id="reg-index" autocomplete="off"/></div>
+    <div class="field"><label>Programme</label>
+      <div class="chip-grid-2" id="prog-grid">
+        <button type="button" class="chip" data-v="Materials Engineering">Materials Engineering</button>
+        <button type="button" class="chip" data-v="Metallurgical Engineering">Metallurgical Engineering</button>
+      </div></div>
+    <div class="field"><label>Group Number</label><div class="chip-grid" id="group-grid"></div></div>
+    <button class="btn btn-primary" style="width:100%;" id="btn-begin" onclick="beginQuiz()">Start →</button>
+  </div>
+  <div class="footer">©Team Benny</div>
+</div>
+
+<!-- ANSWER SHEET -->
+<div id="view-quiz" class="wrap hidden">
+  <div class="sheet-header">
+    <div><div class="student-name" id="disp-name">—</div><div class="student-meta" id="disp-meta">—</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="timer-label" id="timer-label">Time Remaining</div>
+      <div id="timer-display">--:--</div>
+      <div class="tab-warning" id="tab-warn"></div>
+    </div>
+  </div>
+  <div class="grid-container">
+    <div class="grid-title"><span>Answer Sheet</span><span id="progress-text"><b>0</b> / 0</span></div>
+    <div id="answer-grid"></div>
+  </div>
+  <div class="submit-area">
+    <div class="submit-note" id="submit-note"></div>
+    <button class="btn btn-success" id="btn-action" onclick="onAction()">Submit Answers</button>
+  </div>
+  <div class="footer">©Team Benny</div>
+</div>
+
+<!-- THANKS -->
+<div id="view-thanks" class="wrap hidden" style="display:flex;align-items:center;justify-content:center;min-height:80vh;">
+  <div style="text-align:center;"><div class="card">
+    <span style="font-size:56px;" id="thanks-icon">✅</span>
+    <h2 style="font-size:26px;margin:12px 0;" id="thanks-title">Submitted!</h2>
+    <p style="color:var(--text-mid);" id="thanks-msg"></p>
+  </div><div class="footer">©Team Benny</div></div>
+</div>
+
+<script>
+/* ═════════ CONFIG ═════════ */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkyX30HvqzdWFtds4JEkK_vNi0nMjpvyjqSPat9nZZEvez7cMfkPqNtlwU4K-IsYFs/exec";
+const $ = id => document.getElementById(id);
+const QUIZ_ID = new URLSearchParams(location.search).get('quiz');
+
+function showView(n){ ['loading','reg','quiz','thanks'].forEach(v => $('view-'+v).classList.toggle('hidden', v!==n)); }
+const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+
+/* ═════════ LOAD QUIZ CONFIG ═════════ */
+let cfg = null;
+(async function load(){
+  if(!QUIZ_ID){ $('loading-text').textContent = 'This link is missing a quiz code. Ask your instructor for the correct link.'; return; }
+  try{
+    const r = await (await fetch(`${SCRIPT_URL}?action=quiz&quiz=${encodeURIComponent(QUIZ_ID)}`)).json();
+    if(!r.ok) throw new Error(r.error || 'Quiz not found');
+    cfg = r.quiz;
+    document.title = cfg.title;
+    $('reg-badge').textContent = cfg.title;
+    $('reg-subtitle').textContent = cfg.subtitle || '';
+    const n = cfg.questions.length, pen = cfg.tabPenalty;
+    const timing = cfg.timeMode==='per'
+      ? `each question has its own timer and moves on automatically (${fmt(cfg.questions.reduce((a,q)=>a+(q.time||0),0))} total)`
+      : `total time: ${cfg.generalMinutes} minute(s)`;
+    $('reg-info').textContent = `${n} questions · questions are shown on the projector, not on this screen · ${timing} · tab switch = −${pen} pts`;
+    showView('reg');
+  }catch(e){ $('loading-text').textContent = 'Could not load this quiz: ' + e.message; }
+})();
+
+/* ═════════ REGISTRATION ═════════ */
+let programme='', groupNumber='';
+document.querySelectorAll('#prog-grid .chip').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#prog-grid .chip').forEach(x => x.classList.remove('selected'));
+  b.classList.add('selected'); programme = b.dataset.v;
+});
+(function(){
+  const g = $('group-grid');
+  for(let i=1;i<=17;i++){
+    const b = document.createElement('button'); b.type='button'; b.className='chip'; b.textContent=i;
+    b.onclick = () => { g.querySelectorAll('.chip').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); groupNumber='Group '+i; };
+    g.appendChild(b);
+  }
+})();
+
+/* ═════════ STATE ═════════ */
+let studentName='', indexNumber='';
+let answers = {}, tabSwitches = 0, submitted = false, running = false;
+let timerInterval = null, timeLeft = 0, startedAt = 0, curIdx = 0;
+
+function regError(msg){ const e=$('reg-err'); e.textContent=msg; e.classList.remove('hidden'); }
+
+async function beginQuiz(){
+  $('reg-err').classList.add('hidden');
+  const name = $('reg-name').value.trim(), idx = $('reg-index').value.trim();
+  if(!name || !idx || !programme || !groupNumber){ regError('Please fill in all fields, select your programme, and select a group.'); return; }
+
+  const btn = $('btn-begin'); btn.disabled = true; btn.textContent = 'Checking…';
+  try{
+    const r = await (await fetch(`${SCRIPT_URL}?action=check&quiz=${encodeURIComponent(QUIZ_ID)}&index=${encodeURIComponent(idx)}`)).json();
+    if(r.ok && r.exists){
+      regError('This index number has already submitted answers. You cannot submit again.');
+      btn.disabled=false; btn.textContent='Start →'; return;
+    }
+  }catch(e){ console.warn('Duplicate check failed — the server will re-check on submit.', e); }
+
+  studentName = name; indexNumber = idx;
+  answers = {}; tabSwitches = 0; submitted = false; curIdx = 0; running = true;
+  $('disp-name').textContent = studentName;
+  $('disp-meta').textContent = `${indexNumber} · ${programme} · ${groupNumber}`;
+
+  buildSheet();
+  showView('quiz');
+  startedAt = Date.now();
+  if(cfg.timeMode==='per'){ timeLeft = cfg.questions[0].time || 60; $('timer-label').textContent = 'This Question'; }
+  else { timeLeft = Math.round(cfg.generalMinutes*60); }
+  tick(true);
+  timerInterval = setInterval(tick, 1000);
+
+  document.addEventListener('contextmenu', e=>e.preventDefault());
+  document.addEventListener('copy', e=>e.preventDefault());
+  document.addEventListener('cut', e=>e.preventDefault());
+}
+
+/* ═════════ TIMER ═════════ */
+function tick(first){
+  if(!first) timeLeft--;
+  const el = $('timer-display');
+  el.textContent = fmt(Math.max(0,timeLeft));
+  el.classList.remove('warning','danger');
+  const warnAt = cfg.timeMode==='per' ? 5 : 60, dangerAt = cfg.timeMode==='per' ? 3 : 30;
+  if(timeLeft<=dangerAt) el.classList.add('danger'); else if(timeLeft<=warnAt) el.classList.add('warning');
+  if(timeLeft<=0){
+    if(cfg.timeMode==='per' && curIdx < cfg.questions.length-1) goNext();
+    else { clearInterval(timerInterval); submitQuiz(); }
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden && running && !submitted){
+    tabSwitches++;
+    const w = $('tab-warn');
+    w.textContent = `⚠ Tab switches: ${tabSwitches} (−${(tabSwitches*cfg.tabPenalty).toFixed(1)} pts)`;
+    w.classList.add('visible'); setTimeout(()=>w.classList.remove('visible'), 3000);
+  }
+});
+
+/* ═════════ SHEET RENDERING ═════════ */
+function rowFor(q, i, single){
+  const row = document.createElement('div');
+  row.className = 'q-row' + (single ? ' single-q' : '');
+  row.id = 'row-' + q.id;
+  let w = '';
+  if(q.type==='mcq'){
+    w = '<div class="mcq-opts">' + ['A','B','C','D'].map(L =>
+      `<input type="radio" name="${q.id}" id="${q.id}${L}" value="${L}"><label for="${q.id}${L}">${L}</label>`).join('') + '</div>';
+  } else if(q.type==='text'){
+    w = `<input type="text" id="in-${q.id}" placeholder="Type your answer" autocomplete="off" autocapitalize="none" autocorrect="off"/>`;
+  } else {
+    const tag = ((q.exponent ? `× 10^${q.exponent}` : '') + (q.unit ? ' ' + q.unit : '')).trim();
+    w = `<input type="number" inputmode="decimal" step="any" id="in-${q.id}" placeholder="Number only"/>` + (tag ? `<span class="unit-tag"></span>` : '');
+  }
+  row.innerHTML = `<div class="q-num">Q${i+1}</div><div class="q-widget">${w}</div>`;
+  const tagEl = row.querySelector('.unit-tag');
+  if(tagEl) tagEl.textContent = ((q.exponent ? `× 10^${q.exponent}` : '') + (q.unit ? ' ' + q.unit : '')).trim();
+
+  if(q.type==='mcq'){
+    row.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { answers[q.id]=r.value; mark(q.id); }));
+    if(answers[q.id]){ const r = row.querySelector(`input[value="${answers[q.id]}"]`); if(r) r.checked = true; }
+  } else {
+    const inp = row.querySelector('#in-'+q.id);
+    if(answers[q.id] !== undefined) inp.value = answers[q.id];
+    inp.addEventListener('input', () => { if(inp.value.trim()==='') delete answers[q.id]; else answers[q.id]=inp.value; mark(q.id); });
+  }
+  if(answers[q.id] !== undefined) row.classList.add('answered');
+  return row;
+}
+
+function buildSheet(){
+  const grid = $('answer-grid'); grid.innerHTML = '';
+  if(cfg.timeMode==='per'){ renderCurrent(); }
+  else {
+    cfg.questions.forEach((q,i) => grid.appendChild(rowFor(q,i,false)));
+    $('submit-note').textContent = 'Follow along with the questions on screen. Review before submitting — you can\'t change answers after.';
+    $('btn-action').textContent = 'Submit Answers';
+  }
+  updateProgress();
+}
+function renderCurrent(){
+  const grid = $('answer-grid'); grid.innerHTML = '';
+  grid.appendChild(rowFor(cfg.questions[curIdx], curIdx, true));
+  const last = curIdx === cfg.questions.length-1;
+  $('btn-action').textContent = last ? 'Submit Answers' : 'Next →';
+  $('submit-note').textContent = 'Each question has its own timer. You can\'t go back to a previous question.';
+  updateProgress();
+}
+function goNext(){
+  curIdx++;
+  timeLeft = cfg.questions[curIdx].time || 60;
+  renderCurrent(); tick(true);
+}
+function onAction(){
+  if(cfg.timeMode==='per' && curIdx < cfg.questions.length-1) goNext();
+  else submitQuiz();
+}
+function mark(qid){
+  const row = $('row-'+qid); if(row) row.classList.toggle('answered', answers[qid] !== undefined);
+  updateProgress();
+}
+function updateProgress(){
+  const n = cfg.questions.length, done = Object.keys(answers).length;
+  $('progress-text').innerHTML = cfg.timeMode==='per'
+    ? `Question <b>${curIdx+1}</b> / ${n}` : `<b>${done}</b> / ${n} answered`;
+}
+
+/* ═════════ SUBMIT (scored on the server) ═════════ */
+async function submitQuiz(){
+  if(submitted) return;
+  submitted = true; running = false;
+  clearInterval(timerInterval);
+  const btn = $('btn-action'); btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const payload = {
+    action:'submit', quizId: QUIZ_ID, studentName, indexNumber, programme, groupNumber,
+    answers, tabSwitches, timeUsedSeconds: Math.round((Date.now()-startedAt)/1000)
+  };
+  try{
+    const r = await (await fetch(SCRIPT_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload)
+    })).json();
+    if(r.ok){
+      $('thanks-msg').innerHTML = '';
+      const m = $('thanks-msg'); m.append('Your answers have been recorded, '); const b=document.createElement('strong'); b.textContent=studentName; m.append(b, '.'); m.append(document.createElement('br'), 'Results will be shared by your instructor.');
+      showView('thanks');
+    } else if(r.error==='duplicate'){
+      $('thanks-icon').textContent='⚠️'; $('thanks-title').textContent='Already submitted';
+      $('thanks-msg').textContent='This index number has already submitted answers, so this attempt was not recorded.';
+      showView('thanks');
+    } else throw new Error(r.error || 'Server error');
+  }catch(e){
+    // allow retry — answers are still in memory
+    submitted = false;
+    btn.disabled = false; btn.textContent = 'Retry Submit';
+    btn.onclick = submitQuiz;
+    alert('Could not submit (' + e.message + '). Check your connection and tap "Retry Submit".');
+  }
+}
+</script>
+</body>
+</html>

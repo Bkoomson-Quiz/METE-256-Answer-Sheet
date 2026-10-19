@@ -3,94 +3,54 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>METE 256 — Pre-Test</title>
+<title>Quiz Builder — Main</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
   --bg:#fdf8f3; --surface:#fff; --surface2:#f5ede3; --border:#e2cdb8;
-  --brown-deep:#3d1f0d; --brown-mid:#7b4a2d; --accent-warm:#c2763a;
-  --success:#4a7c59; --warning:#c2763a; --danger:#9b3030;
-  --text:#2a1408; --text-mid:#5c3520; --muted:#9c7a64;
-  --shadow:0 4px 32px rgba(61,31,13,0.10);
+  --brown-deep:#3d1f0d; --brown-mid:#7b4a2d; --success:#4a7c59; --danger:#9b3030;
+  --text:#2a1408; --muted:#9c7a64; --shadow:0 4px 32px rgba(61,31,13,0.10);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 .hidden{display:none !important;}
-.wrap{max-width:820px;margin:0 auto;padding:24px 16px 48px;}
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:36px;}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 48px;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:32px;margin-bottom:20px;}
 h1,h2,h3{font-family:'Playfair Display',serif;color:var(--brown-deep);}
-.badge{display:inline-block;background:linear-gradient(135deg,rgba(123,74,45,.14),rgba(194,118,58,.08));border:1.5px solid rgba(123,74,45,.3);color:var(--brown-mid);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:30px;}
 .field{margin-bottom:18px;}
-.field label{display:block;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--brown-mid);margin-bottom:7px;}
+.field label,.lbl{display:block;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--brown-mid);margin-bottom:7px;}
 input[type=text],input[type=number],input[type=password],textarea,select{
   width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;
-  font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;
-}
+  font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;}
 textarea{resize:vertical;min-height:70px;}
 input:focus,textarea:focus,select:focus{border-color:var(--brown-mid);box-shadow:0 0 0 3px rgba(123,74,45,.12);}
-.btn{cursor:pointer;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:13px 26px;transition:transform .15s,box-shadow .15s;}
+.btn{cursor:pointer;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:13px 26px;transition:transform .15s;}
 .btn:hover{transform:translateY(-1px);}
-.btn-primary{background:linear-gradient(135deg,#7b4a2d,#5c3520);color:#fff;box-shadow:0 5px 20px rgba(61,31,13,.22);}
-.btn-success{background:linear-gradient(135deg,#4a7c59,#366044);color:#fff;box-shadow:0 4px 18px rgba(74,124,89,.28);}
+.btn-primary{background:linear-gradient(135deg,#7b4a2d,#5c3520);color:#fff;}
+.btn-success{background:linear-gradient(135deg,#4a7c59,#366044);color:#fff;}
 .btn-danger{background:#9b3030;color:#fff;}
 .btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--brown-mid);}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.small-btn{padding:7px 12px;font-size:12px;border-radius:8px;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.chip-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
-.chip-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.chip{padding:12px 8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;text-align:center;transition:.15s;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.chip{padding:12px 8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;text-align:center;}
 .chip:hover{border-color:var(--brown-mid);color:var(--brown-mid);}
 .chip.selected{border-color:var(--brown-mid);background:var(--brown-mid);color:#fff;}
+.toggle{display:flex;gap:8px;margin-bottom:14px;}
+.toggle .chip{flex:1;}
 .info{background:rgba(194,118,58,.08);border:1.5px solid rgba(194,118,58,.3);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--brown-mid);line-height:1.6;margin-bottom:20px;}
-.footer{text-align:center;margin-top:28px;font-size:12px;color:var(--muted);letter-spacing:1px;}
-
-/* admin entry */
-#admin-entry-btn{position:fixed;bottom:16px;right:16px;z-index:50;background:var(--brown-deep);color:#fff;border:none;border-radius:30px;padding:10px 18px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;opacity:.55;box-shadow:0 4px 16px rgba(0,0,0,.2);}
-#admin-entry-btn:hover{opacity:1;}
-
-/* sheet header */
-.sheet-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:18px 24px;margin-bottom:20px;box-shadow:var(--shadow);}
-.student-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--brown-deep);}
-.student-meta{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-.timer-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:center;}
-#timer-display{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700;color:var(--brown-mid);text-align:center;line-height:1;}
-#timer-display.warning{color:var(--warning);}
-#timer-display.danger{color:var(--danger);animation:pulse .6s infinite alternate;}
-@keyframes pulse{from{opacity:1}to{opacity:.5}}
-.tab-warning{font-size:12px;color:var(--danger);font-family:'JetBrains Mono',monospace;background:rgba(155,48,48,.1);border:1px solid rgba(155,48,48,.3);border-radius:8px;padding:5px 12px;display:none;}
-.tab-warning.visible{display:block;}
-
-/* answer grid */
-.grid-container{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);}
-.grid-title{padding:16px 24px;background:var(--brown-deep);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);display:flex;justify-content:space-between;align-items:center;}
-.answered-count{font-family:'JetBrains Mono',monospace;color:#f0c897;font-size:13px;}
-.q-row{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid rgba(226,205,184,.5);}
-.q-row:last-child{border-bottom:none;}
-.q-row.answered{background:rgba(74,124,89,.06);}
-.q-num{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--muted);width:44px;flex-shrink:0;}
-.q-widget{flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.mcq-opts{display:flex;gap:8px;}
-.mcq-opts input[type=radio]{display:none;}
-.mcq-opts label{width:44px;height:44px;border-radius:10px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;transition:.15s;}
-.mcq-opts label:hover{border-color:var(--brown-mid);color:var(--brown-mid);background:rgba(123,74,45,.08);}
-.mcq-opts input:checked+label{border-color:var(--brown-mid);background:var(--brown-mid);color:#fff;}
-.q-widget input[type=text],.q-widget input[type=number]{max-width:260px;}
-.unit-tag{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--brown-mid);background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;white-space:nowrap;}
-.submit-area{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:20px;flex-wrap:wrap;}
-.submit-note{font-size:13px;color:var(--muted);flex:1;}
-
-/* admin */
-.tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
-.tab-btn{padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--brown-mid);font-weight:700;font-size:13px;cursor:pointer;}
-.tab-btn.active{background:var(--brown-mid);color:#fff;border-color:var(--brown-mid);}
-.admin-q-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--surface2);}
-.admin-q-row-text{font-size:14px;color:var(--text);font-weight:700;}
-.admin-q-row-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
-.admin-q-row-actions{display:flex;gap:6px;flex-shrink:0;}
-.small-btn{padding:7px 12px;font-size:12px;border-radius:8px;}
 .status-msg{font-size:13px;padding:10px 14px;border-radius:10px;margin-top:12px;}
 .status-ok{background:rgba(74,124,89,.1);color:var(--success);border:1px solid rgba(74,124,89,.3);}
 .status-err{background:rgba(155,48,48,.1);color:var(--danger);border:1px solid rgba(155,48,48,.3);}
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.tab-btn{padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--brown-mid);font-weight:700;font-size:13px;cursor:pointer;}
+.tab-btn.active{background:var(--brown-mid);color:#fff;border-color:var(--brown-mid);}
+.admin-q-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--surface2);flex-wrap:wrap;}
+.q-title{font-size:14px;font-weight:700;}
+.q-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.q-actions{display:flex;gap:6px;}
 table{width:100%;border-collapse:collapse;font-size:14px;}
 th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);}
 th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-mid);}
@@ -100,137 +60,106 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-
 .stat-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
 .overlay{position:fixed;inset:0;background:rgba(61,31,13,.5);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
 .modal{background:var(--surface);border-radius:18px;padding:32px;max-width:460px;width:100%;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto;}
-.type-toggle{display:flex;gap:8px;margin-bottom:18px;}
-.type-toggle button{flex:1;}
-@media(max-width:600px){.grid2,.chip-grid-2,.stat-cards{grid-template-columns:1fr 1fr;} .card{padding:22px;} .q-row{flex-direction:column;align-items:flex-start;}}
+.share{display:flex;gap:24px;align-items:center;flex-wrap:wrap;}
+#qr{background:#fff;padding:10px;border-radius:12px;border:1.5px solid var(--border);}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+@media(max-width:600px){.grid2,.grid3,.stat-cards{grid-template-columns:1fr;} .card{padding:20px;}}
 </style>
 </head>
 <body>
 
-<button id="admin-entry-btn" class="hidden" onclick="showView('admin-gate')">⚙ Admin</button>
-
-<!-- STUDENT REGISTRATION -->
-<div id="view-student-reg" class="wrap">
-  <div class="card">
-    <div style="text-align:center;margin-bottom:28px;">
-      <span class="badge" id="reg-badge">METE 256 · Pre-Test</span>
-      <h1 style="font-size:32px;margin-top:14px;">Answer Sheet</h1>
-      <div style="color:var(--muted);font-size:14px;margin-top:4px;" id="reg-subtitle">Ore Beneficiation</div>
-    </div>
-    <div class="info" id="reg-info">Loading test details…</div>
-    <div class="field"><label>Full Name</label><input type="text" id="reg-name" autocomplete="off"/></div>
-    <div class="field"><label>Index Number</label><input type="text" id="reg-index" autocomplete="off"/></div>
-    <div class="field">
-      <label>Programme</label>
-      <div class="chip-grid-2" id="prog-grid">
-        <button type="button" class="chip" data-v="Materials Engineering">Materials Engineering</button>
-        <button type="button" class="chip" data-v="Metallurgical Engineering">Metallurgical Engineering</button>
-      </div>
-    </div>
-    <div class="field"><label>Group Number</label><div class="chip-grid" id="group-grid"></div></div>
-    <button class="btn btn-primary" style="width:100%;" id="btn-begin" onclick="beginQuiz()">Open Answer Sheet →</button>
+<!-- LOGIN -->
+<div id="view-login" class="wrap" style="display:flex;align-items:center;justify-content:center;min-height:80vh;">
+  <div class="card" style="max-width:380px;width:100%;">
+    <h2 style="font-size:22px;text-align:center;margin-bottom:18px;">Quiz Builder Login</h2>
+    <div class="field"><label>Password</label><input type="password" id="pw" autocomplete="off" onkeydown="if(event.key==='Enter')login()"/></div>
+    <button class="btn btn-primary" style="width:100%;" id="btn-login" onclick="login()">Login</button>
+    <div id="login-err" class="status-msg status-err hidden"></div>
   </div>
-  <div class="footer">©Team Benny</div>
 </div>
 
-<!-- STUDENT ANSWER SHEET (single page, all questions, projected on screen) -->
-<div id="view-student-quiz" class="wrap hidden">
-  <div class="sheet-header">
+<!-- DASHBOARD -->
+<div id="view-app" class="wrap hidden">
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
     <div>
-      <div class="student-name" id="disp-name">—</div>
-      <div class="student-meta" id="disp-meta">—</div>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-      <div class="timer-label">Time Remaining</div>
-      <div id="timer-display">--:--</div>
-      <div class="tab-warning" id="tab-warn">⚠ Tab switch detected</div>
-    </div>
-  </div>
-
-  <div class="grid-container">
-    <div class="grid-title">
-      <span>Answer Sheet</span>
-      <span class="answered-count"><span id="ans-count">0</span> / <span id="ans-total">0</span> answered</span>
-    </div>
-    <div id="answer-grid"></div>
-  </div>
-
-  <div class="submit-area">
-    <div class="submit-note">Follow along with the questions on screen. Review before submitting — you can't change answers after.</div>
-    <button class="btn btn-success" id="btn-submit" onclick="submitQuiz()">Submit Answers</button>
-  </div>
-  <div class="footer">©Team Benny</div>
-</div>
-
-<!-- STUDENT THANKS -->
-<div id="view-student-thanks" class="wrap hidden" style="display:flex;align-items:center;justify-content:center;min-height:80vh;">
-  <div style="text-align:center;">
-    <div class="card">
-      <span style="font-size:60px;">✅</span>
-      <h2 style="font-size:26px;margin:12px 0;">Submitted!</h2>
-      <p style="color:var(--text-mid);">Your answers have been recorded, <strong id="thanks-name"></strong>.<br/>Results will be shared by your instructor.</p>
-    </div>
-    <div class="footer">©Team Benny</div>
-  </div>
-</div>
-
-<!-- ADMIN GATE -->
-<div id="view-admin-gate" class="wrap hidden" style="display:flex;align-items:center;justify-content:center;min-height:80vh;">
-  <div class="card" style="max-width:380px;">
-    <h2 style="font-size:22px;text-align:center;margin-bottom:18px;">Admin Login</h2>
-    <div class="field"><label>Password</label><input type="password" id="admin-pw" autocomplete="off" onkeydown="if(event.key==='Enter')attemptAdminLogin()"/></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="attemptAdminLogin()">Login</button>
-    <div id="admin-login-err" class="status-msg status-err hidden">Incorrect password.</div>
-    <div style="text-align:center;margin-top:16px;"><a href="#" style="font-size:13px;color:var(--muted);" onclick="showView('student-reg');return false;">← Back to quiz</a></div>
-  </div>
-</div>
-
-<!-- ADMIN DASHBOARD -->
-<div id="view-admin-dashboard" class="wrap hidden">
-  <div class="card" style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <div>
-      <div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Admin Panel</div>
+      <div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Main Panel</div>
       <h2 style="font-size:22px;">Welcome, Dr. Bennetta Koomson</h2>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-ghost small-btn" onclick="showView('student-reg')">View Site</button>
-      <button class="btn btn-ghost small-btn" onclick="adminLogout()">Logout</button>
-    </div>
+    <button class="btn btn-ghost small-btn" onclick="logout()">Logout</button>
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" data-tab="questions" onclick="switchAdminTab('questions')">Questions</button>
-    <button class="tab-btn" data-tab="results" onclick="switchAdminTab('results')">Results</button>
-    <button class="tab-btn" data-tab="settings" onclick="switchAdminTab('settings')">Settings</button>
+    <button class="tab-btn active" data-tab="builder" onclick="switchTab('builder')">Quiz Builder</button>
+    <button class="tab-btn" data-tab="results" onclick="switchTab('results')">Results</button>
   </div>
 
-  <!-- QUESTIONS TAB -->
-  <div id="tab-questions" class="card">
-    <div class="grid2" style="margin-bottom:18px;">
-      <div class="field" style="margin:0;"><label>Test Title</label><input type="text" id="meta-title"/></div>
-      <div class="field" style="margin:0;"><label>Test Subtitle</label><input type="text" id="meta-subtitle"/></div>
+  <!-- BUILDER -->
+  <div id="tab-builder">
+    <div class="card">
+      <div class="field">
+        <label>Open a quiz</label>
+        <div class="row">
+          <select id="quiz-select" style="flex:1;min-width:200px;" onchange="onSelectQuiz()"></select>
+          <button class="btn btn-ghost small-btn" onclick="startNewQuiz()">+ New quiz</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="field"><label>Quiz Title (also the Excel tab name)</label><input type="text" id="meta-title" placeholder="e.g. METE 256 Pre-Test"/></div>
+        <div class="field"><label>Subtitle</label><input type="text" id="meta-subtitle" placeholder="e.g. Ore Beneficiation"/></div>
+      </div>
+
+      <div class="lbl">Timing</div>
+      <div class="toggle">
+        <button type="button" class="chip selected" id="mode-general" onclick="setTimeMode('general')">One general time</button>
+        <button type="button" class="chip" id="mode-per" onclick="setTimeMode('per')">Time per question</button>
+      </div>
+      <div class="grid3">
+        <div class="field" id="box-general"><label>Total time (minutes)</label><input type="number" id="meta-minutes" min="1" value="9"/></div>
+        <div class="field hidden" id="box-default"><label>Default seconds per question</label><input type="number" id="meta-defsec" min="5" value="60"/></div>
+        <div class="field"><label>Tab-switch penalty (pts)</label><input type="number" id="meta-penalty" min="0" step="0.5" value="1.5"/></div>
+      </div>
+
+      <div class="info" id="mode-info">Students get one countdown for the whole answer sheet. Questions are not shown on their phones — you project them.</div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="font-size:16px;">Questions (<span id="q-count">0</span>)</h3>
+        <button class="btn btn-primary small-btn" onclick="openEditor(null)">+ Add Question</button>
+      </div>
+      <div id="q-list"></div>
+
+      <div class="row" style="margin-top:20px;">
+        <button class="btn btn-success" id="btn-save" onclick="saveQuiz()">Save &amp; Create Answer Sheet Link</button>
+      </div>
+      <div id="save-status"></div>
     </div>
-    <div class="field" style="max-width:220px;"><label>Total Time (minutes)</label><input type="number" id="meta-time" min="1" value="9"/></div>
-    <div class="info">No question text needed here — you'll project the actual questions on screen. Just add one entry per question in order, choose its type, and set the correct answer. The number that appears is just the question's position (Q1, Q2, …).</div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <h3 style="font-size:16px;">Questions (<span id="q-count">0</span>)</h3>
-      <button class="btn btn-primary small-btn" onclick="openQuestionEditor(null)">+ Add Question</button>
+
+    <div class="card hidden" id="share-card">
+      <h3 style="font-size:16px;margin-bottom:12px;">Answer sheet link (share with students)</h3>
+      <div class="share">
+        <div style="flex:1;min-width:240px;">
+          <div class="field"><label>Link</label><input type="text" id="share-link" readonly onclick="this.select()"/></div>
+          <div class="row">
+            <button class="btn btn-primary small-btn" onclick="copyLink()">Copy link</button>
+            <button class="btn btn-ghost small-btn" onclick="window.open(document.getElementById('share-link').value,'_blank')">Open</button>
+          </div>
+          <div class="field" style="margin-top:16px;">
+            <label>Answer sheet page URL (hosted <code>answer.html</code>)</label>
+            <input type="text" id="answer-base" onchange="saveBase()"/>
+          </div>
+        </div>
+        <div id="qr"></div>
+      </div>
     </div>
-    <div id="admin-q-list"></div>
-    <div style="display:flex;gap:10px;margin-top:20px;">
-      <button class="btn btn-success" onclick="publishQuestions()">Publish to GitHub</button>
-      <button class="btn btn-ghost" onclick="reloadQuestionsFromGitHub()">Reload from GitHub</button>
-    </div>
-    <div id="publish-status"></div>
   </div>
 
-  <!-- RESULTS TAB -->
+  <!-- RESULTS -->
   <div id="tab-results" class="card hidden">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3 style="font-size:16px;">Submissions</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
+      <h3 style="font-size:16px;">Submissions — <span id="res-title">no quiz selected</span></h3>
       <button class="btn btn-ghost small-btn" onclick="loadResults()">Refresh</button>
     </div>
-    <div id="results-status" style="font-size:13px;color:var(--muted);margin-bottom:12px;">Not loaded yet.</div>
+    <div id="results-status" style="font-size:13px;color:var(--muted);margin-bottom:12px;"></div>
     <div class="stat-cards" id="stat-cards" style="display:none;">
       <div class="stat-card"><div class="stat-num" id="stat-count">0</div><div class="stat-label">Submissions</div></div>
       <div class="stat-card"><div class="stat-num" id="stat-avg">0%</div><div class="stat-label">Average</div></div>
@@ -243,601 +172,286 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-
       </table>
     </div>
   </div>
-
-  <!-- SETTINGS TAB -->
-  <div id="tab-settings" class="card hidden">
-    <h3 style="font-size:16px;margin-bottom:14px;">GitHub Connection</h3>
-    <div class="info">
-      Changes you publish are committed directly to your GitHub repo, so every student sees the update the next time they open the link.
-      You need a Personal Access Token with write access to this one repo (Settings → Developer settings → Fine-grained tokens →
-      grant this repo, permission "Contents: Read and write"). The token is saved only in this browser — never shown to students.
-    </div>
-    <div class="grid2">
-      <div class="field"><label>GitHub Owner</label><input type="text" id="cfg-owner"/></div>
-      <div class="field"><label>Repo Name</label><input type="text" id="cfg-repo"/></div>
-      <div class="field"><label>Branch</label><input type="text" id="cfg-branch"/></div>
-      <div class="field"><label>File Path</label><input type="text" id="cfg-path"/></div>
-    </div>
-    <div class="field"><label>Personal Access Token</label><input type="password" id="cfg-token" placeholder="ghp_… or github_pat_…"/></div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-primary" onclick="saveAdminConfig()">Save Settings</button>
-      <button class="btn btn-ghost" onclick="testGitHubConnection()">Test Connection</button>
-    </div>
-    <div id="settings-status"></div>
-  </div>
 </div>
 
-<!-- QUESTION EDITOR MODAL -->
+<!-- QUESTION EDITOR -->
 <div id="editor-overlay" class="overlay hidden">
   <div class="modal">
     <h3 style="font-size:18px;margin-bottom:16px;" id="editor-title">Add Question</h3>
-    <div class="type-toggle">
-      <button type="button" class="chip selected" id="type-mcq-btn" onclick="setEditorType('mcq')">Multiple Choice</button>
-      <button type="button" class="chip" id="type-text-btn" onclick="setEditorType('text')">Word Answer</button>
-      <button type="button" class="chip" id="type-calc-btn" onclick="setEditorType('calc')">Calculation</button>
+    <div class="toggle">
+      <button type="button" class="chip selected" id="t-mcq" onclick="setEditorType('mcq')">Multiple Choice</button>
+      <button type="button" class="chip" id="t-text" onclick="setEditorType('text')">Word Answer</button>
+      <button type="button" class="chip" id="t-calc" onclick="setEditorType('calc')">Calculation</button>
     </div>
 
-    <div id="ed-mcq-fields">
+    <div id="ed-mcq">
       <div class="field"><label>Correct Answer</label>
-        <select id="ed-correct"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
-      </div>
+        <select id="ed-correct"><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
     </div>
-
-    <div id="ed-text-fields" class="hidden">
-      <div class="field"><label>Accepted Answer(s)</label>
-        <input type="text" id="ed-correcttext" placeholder="e.g. froth flotation, flotation"/>
-      </div>
-      <div class="info" style="margin-bottom:0;">Separate multiple acceptable spellings with commas. Matching ignores capitalization and extra spaces.</div>
+    <div id="ed-text" class="hidden">
+      <div class="field"><label>Accepted Answer(s)</label><input type="text" id="ed-correcttext" placeholder="e.g. froth flotation, flotation"/></div>
+      <div class="info">Separate multiple acceptable spellings with commas. Capitalisation and extra spaces are ignored. Students will see an empty box to type the word.</div>
     </div>
-
-    <div id="ed-calc-fields" class="hidden">
-      <label style="display:block;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--brown-mid);margin-bottom:7px;">Correct Value · ×10^ Exponent · Unit</label>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <input type="number" id="ed-calcvalue" placeholder="Value" step="any" style="max-width:140px;"/>
+    <div id="ed-calc" class="hidden">
+      <label class="lbl">Correct Value · ×10^ Exponent · Unit</label>
+      <div class="row" style="margin-bottom:12px;">
+        <input type="number" id="ed-value" placeholder="Value" step="any" style="max-width:130px;"/>
         <span>× 10^</span>
-        <input type="number" id="ed-calcexp" placeholder="Exponent" value="0" style="max-width:100px;"/>
-        <input type="text" id="ed-calcunit" placeholder="Unit (e.g. kg)" style="max-width:140px;"/>
+        <input type="number" id="ed-exp" placeholder="Exp" value="0" style="max-width:90px;"/>
+        <input type="text" id="ed-unit" placeholder="Unit (kg)" style="max-width:120px;"/>
       </div>
-      <div class="field"><label>Tolerance (%)</label><input type="number" id="ed-tolerance" value="5" min="0" style="max-width:140px;"/></div>
+      <div class="info">On the answer sheet the "× 10^exponent" and the unit are already shown beside the box — students type only the number.</div>
+      <div class="field"><label>Tolerance (%)</label><input type="number" id="ed-tol" value="5" min="0" style="max-width:140px;"/></div>
     </div>
 
-    <div class="field"><label>Admin Note (optional, students never see this)</label><textarea id="ed-note" placeholder="e.g. reminder of the actual question, for your own reference"></textarea></div>
+    <div class="field hidden" id="ed-time-box"><label>Time for this question (seconds)</label><input type="number" id="ed-time" min="5" value="60" style="max-width:160px;"/></div>
+    <div class="field"><label>Admin Note (students never see this)</label><textarea id="ed-note" placeholder="Reminder of the actual question, for your reference"></textarea></div>
 
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <button class="btn btn-primary" onclick="saveQuestionFromEditor()">Save Question</button>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn btn-primary" onclick="saveQuestion()">Save Question</button>
       <button class="btn btn-ghost" onclick="closeEditor()">Cancel</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ══════════════ CONFIG ══════════════ */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkyX30HvqzdWFtds4JEkK_vNi0nMjpvyjqSPat9nZZEvez7cMfkPqNtlwU4K-IsYFs/exec";
-const DEFAULT_CFG = { owner:"Bkoomson-Quiz", repo:"METE-256-Answer-Sheet", branch:"main", path:"data/questions.json", token:"" };
-const TAB_PENALTY = 1.5;
-const ADMIN_PASSWORD = "BK123456";
+/* ═════════ CONFIG ═════════ */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkyX30HvqzdWFtds4JEkK_vNi0nMjpvyjqSPat9nZZEvez7cMfkPqNtlwU4K-IsYFs/exec";
 
-function loadCfg(){
-  try{ return { ...DEFAULT_CFG, ...JSON.parse(localStorage.getItem('kn_admin_cfg')||'{}') }; }
-  catch(e){ return { ...DEFAULT_CFG }; }
-}
-function saveCfgToStorage(cfg){ localStorage.setItem('kn_admin_cfg', JSON.stringify(cfg)); }
+let PW = sessionStorage.getItem('qb_pw') || '';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* ══════════════ VIEW SWITCHING ══════════════ */
-function showView(name){
-  ['student-reg','student-quiz','student-thanks','admin-gate','admin-dashboard'].forEach(v=>{
-    document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
+async function api(action, payload = {}){
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // avoids CORS preflight
+    body: JSON.stringify({ action, password: PW, ...payload })
   });
+  return res.json();
 }
 
-/* ══════════════ ADMIN VISIBILITY (hidden by default) ══════════════ */
-(function initAdminVisibility(){
-  const params = new URLSearchParams(location.search);
-  let adminParamValue = null;
-  for(const [key, value] of params.entries()){
-    if(key.toLowerCase() === 'admin'){ adminParamValue = value; break; }
-  }
-  if(adminParamValue === '1'){
-    localStorage.setItem('kn_admin_visible','1');
-    history.replaceState({}, '', location.pathname);
-  }
-  if(localStorage.getItem('kn_admin_visible')==='1'){
-    document.getElementById('admin-entry-btn').classList.remove('hidden');
-  }
-})();
-
-/* ══════════════ REGISTRATION UI ══════════════ */
-let programme='', groupNumber='';
-document.querySelectorAll('#prog-grid .chip').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#prog-grid .chip').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected'); programme = btn.dataset.v;
-  });
-});
-(function buildGroups(){
-  const grid = document.getElementById('group-grid');
-  for(let g=1;g<=17;g++){
-    const btn=document.createElement('button');
-    btn.type='button'; btn.className='chip'; btn.textContent=g; btn.dataset.v='Group '+g;
-    btn.onclick=()=>{ document.querySelectorAll('#group-grid .chip').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); groupNumber='Group '+g; };
-    grid.appendChild(btn);
-  }
-})();
-
-/* ══════════════ LOAD QUESTIONS (public, relative fetch) ══════════════ */
-let testData = { testTitle:"METE 256 — Pre-Test", testSubtitle:"Ore Beneficiation", timeLimitMinutes:9, questions:[] };
-async function loadPublicQuestions(){
+/* ═════════ LOGIN ═════════ */
+async function login(){
+  const err = $('login-err'), btn = $('btn-login');
+  PW = $('pw').value;
+  btn.disabled = true; btn.textContent = 'Checking…'; err.classList.add('hidden');
   try{
-    const res = await fetch('./data/questions.json?t='+Date.now(), {cache:'no-store'});
-    testData = await res.json();
-  }catch(e){ console.warn('Could not load questions.json', e); }
-  document.getElementById('reg-badge').textContent = testData.testTitle || 'Pre-Test';
-  document.getElementById('reg-subtitle').textContent = testData.testSubtitle || '';
-  document.getElementById('reg-info').textContent =
-    `${(testData.questions||[]).length} questions · questions are shown on the projector, not here · total time: ${testData.timeLimitMinutes||9} minutes · tab switch = −1.5 pts penalty`;
+    const r = await api('verify');
+    if(r.ok){ sessionStorage.setItem('qb_pw', PW); enterApp(); }
+    else { PW=''; err.textContent = r.error || 'Incorrect password.'; err.classList.remove('hidden'); }
+  }catch(e){ PW=''; err.textContent = 'Could not reach the server: ' + e.message; err.classList.remove('hidden'); }
+  btn.disabled = false; btn.textContent = 'Login';
 }
-loadPublicQuestions();
+function logout(){ sessionStorage.removeItem('qb_pw'); PW=''; location.reload(); }
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===t));
+  $('tab-builder').classList.toggle('hidden', t!=='builder');
+  $('tab-results').classList.toggle('hidden', t!=='results');
+  if(t==='results') loadResults();
+}
+async function enterApp(){
+  $('view-login').classList.add('hidden'); $('view-app').classList.remove('hidden');
+  startNewQuiz();
+  await refreshQuizList();
+}
 
-/* ══════════════ QUIZ STATE ══════════════ */
-let studentName='', indexNumber='';
-let answers = {};
-let tabSwitches = 0;
-let submitted = false;
-let timerInterval = null;
-let timeLeft = 0;
-let totalTime = 0;
+/* ═════════ QUIZ STATE ═════════ */
+let quiz = blankQuiz();
+let editingId = null, editorType = 'mcq';
+function blankQuiz(){ return { id:null, title:'', subtitle:'', timeMode:'general', generalMinutes:9, defaultSeconds:60, tabPenalty:1.5, questions:[] }; }
 
-async function beginQuiz(){
-  const nameEl = document.getElementById('reg-name');
-  const idxEl = document.getElementById('reg-index');
-  const btn = document.getElementById('btn-begin');
-
-  if(!nameEl.value.trim() || !idxEl.value.trim() || !programme || !groupNumber){
-    alert('Please fill in all fields, select your programme, and select a group.');
-    return;
-  }
-  if(!testData.questions || testData.questions.length===0){
-    alert('No questions are available yet. Please check back later.');
-    return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Checking…';
+async function refreshQuizList(selectId){
   try{
-    const resp = await fetch(`${GOOGLE_SCRIPT_URL}?sheet=Sheet1`);
-    const data = await resp.json();
-    const already = (Array.isArray(data)?data:[]).some(r=>
-      String(r.indexNumber||'').trim().toLowerCase() === idxEl.value.trim().toLowerCase()
-    );
-    if(already){
-      alert('This index number has already submitted answers. You cannot submit again.');
-      btn.disabled=false; btn.textContent='Open Answer Sheet →';
-      return;
-    }
-  }catch(e){ console.warn('Duplicate check failed, proceeding.', e); }
-
-  studentName = nameEl.value.trim();
-  indexNumber = idxEl.value.trim();
-  answers = {}; tabSwitches = 0; submitted = false;
-
-  document.getElementById('disp-name').textContent = studentName;
-  document.getElementById('disp-meta').textContent = `${indexNumber} · ${programme} · ${groupNumber}`;
-  document.getElementById('thanks-name').textContent = studentName;
-
-  buildAnswerGrid();
-  showView('student-quiz');
-
-  totalTime = (testData.timeLimitMinutes || 9) * 60;
-  timeLeft = totalTime;
-  updateTimerDisplay();
-  timerInterval = setInterval(()=>{
-    timeLeft--;
-    updateTimerDisplay();
-    if(timeLeft<=0){ clearInterval(timerInterval); submitQuiz(); }
-  },1000);
-
-  document.addEventListener('contextmenu', e=>e.preventDefault());
-  document.addEventListener('copy', e=>e.preventDefault());
-  document.addEventListener('cut', e=>e.preventDefault());
+    const r = await api('list');
+    const sel = $('quiz-select');
+    sel.innerHTML = '<option value="">— New quiz —</option>' +
+      (r.quizzes||[]).map(q => `<option value="${esc(q.id)}">${esc(q.title)}</option>`).join('');
+    sel.value = selectId || quiz.id || '';
+  }catch(e){ console.warn(e); }
 }
-
-document.addEventListener('visibilitychange', ()=>{
-  if(document.hidden && !submitted && timerInterval){
-    tabSwitches++;
-    const warn = document.getElementById('tab-warn');
-    warn.textContent = `⚠ Tab switches: ${tabSwitches} (−${(tabSwitches*TAB_PENALTY).toFixed(1)} pts)`;
-    warn.classList.add('visible');
-    setTimeout(()=>warn.classList.remove('visible'), 3000);
-  }
-});
-
-function updateTimerDisplay(){
-  const el = document.getElementById('timer-display');
-  const mins = Math.floor(timeLeft/60), secs = timeLeft%60;
-  el.textContent = `${mins}:${String(secs).padStart(2,'0')}`;
-  el.classList.remove('warning','danger');
-  if(timeLeft<=30) el.classList.add('danger');
-  else if(timeLeft<=60) el.classList.add('warning');
+function startNewQuiz(){
+  quiz = blankQuiz(); fillMeta(); renderList();
+  $('quiz-select').value = ''; $('share-card').classList.add('hidden'); $('save-status').innerHTML = '';
 }
-
-function buildAnswerGrid(){
-  const container = document.getElementById('answer-grid');
-  container.innerHTML = '';
-  document.getElementById('ans-total').textContent = testData.questions.length;
-  document.getElementById('ans-count').textContent = 0;
-
-  testData.questions.forEach((q,i)=>{
-    const row = document.createElement('div');
-    row.className = 'q-row';
-    row.id = `row-${q.id}`;
-
-    let widgetHtml = '';
-    if(q.type==='mcq'){
-      widgetHtml = `<div class="mcq-opts">` + ['A','B','C','D'].map(letter=>`
-        <input type="radio" name="${q.id}" id="${q.id}${letter}" value="${letter}">
-        <label for="${q.id}${letter}">${letter}</label>
-      `).join('') + `</div>`;
-    } else if(q.type==='text'){
-      widgetHtml = `<input type="text" id="input-${q.id}" placeholder="Type your answer" autocomplete="off"/>`;
-    } else if(q.type==='calc'){
-      const expTxt = (q.exponent && q.exponent!==0) ? ` × 10^${q.exponent}` : '';
-      widgetHtml = `<input type="number" step="any" id="input-${q.id}" placeholder="Number only"/><span class="unit-tag">${expTxt}${q.unit? ' '+q.unit : ''}</span>`;
-    }
-
-    row.innerHTML = `<div class="q-num">Q${i+1}</div><div class="q-widget">${widgetHtml}</div>`;
-    container.appendChild(row);
-
-    if(q.type==='mcq'){
-      row.querySelectorAll('input[type=radio]').forEach(radio=>{
-        radio.addEventListener('change', ()=>{ answers[q.id]=radio.value; markAnswered(q.id); });
-      });
-    } else {
-      const inp = row.querySelector(`#input-${q.id}`);
-      inp.addEventListener('input', ()=>{
-        if(inp.value.trim()==='') delete answers[q.id]; else answers[q.id]=inp.value;
-        markAnswered(q.id);
-      });
-    }
-  });
-}
-
-function markAnswered(qid){
-  const row = document.getElementById(`row-${qid}`);
-  row.classList.toggle('answered', answers[qid]!==undefined && answers[qid]!=='');
-  document.getElementById('ans-count').textContent = Object.keys(answers).filter(k=>answers[k]!==undefined && answers[k]!=='').length;
-}
-
-async function submitQuiz(){
-  if(submitted) return;
-  submitted = true;
-  clearInterval(timerInterval);
-  document.getElementById('btn-submit').disabled = true;
-  document.getElementById('btn-submit').textContent = 'Submitting…';
-
-  let rawScore = 0;
-  const detail = [];
-  testData.questions.forEach(q=>{
-    const given = answers[q.id];
-    let correct = false;
-    if(q.type==='mcq'){
-      correct = given === q.correct;
-    } else if(q.type==='text'){
-      if(given!==undefined){
-        const accepted = (q.correctText||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-        correct = accepted.includes(String(given).trim().toLowerCase());
-      }
-    } else if(q.type==='calc'){
-      const num = parseFloat(given);
-      if(!isNaN(num)){
-        const tol = (q.tolerancePct??5)/100;
-        const allowed = Math.max(Math.abs(q.correctValue)*tol, 1e-9);
-        correct = Math.abs(num - q.correctValue) <= allowed;
-      }
-    }
-    if(correct) rawScore++;
-    detail.push(`${q.id}=${given??'-'}`);
-  });
-
-  const tabDeduction = tabSwitches * TAB_PENALTY;
-  const finalScore = Math.max(0, rawScore - tabDeduction);
-  const totalQ = testData.questions.length;
-  const percentage = ((finalScore/totalQ)*100).toFixed(1);
-  const timeUsedSeconds = totalTime - timeLeft;
-
-  const payload = {
-    sheet:'Sheet1', studentName, indexNumber, groupNumber, programme,
-    answers: detail.join(','), totalAnswered: Object.keys(answers).length,
-    tabSwitches, tabDeduction: tabDeduction.toFixed(1),
-    timeUsedSeconds, timestamp: new Date().toLocaleString(),
-    rawScore, finalScore: finalScore.toFixed(1), totalQuestions: totalQ, percentage,
-  };
-
+async function onSelectQuiz(){
+  const id = $('quiz-select').value;
+  if(!id){ startNewQuiz(); return; }
+  $('save-status').innerHTML = '<div class="status-msg">Loading…</div>';
   try{
-    await fetch(GOOGLE_SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  }catch(e){ console.error('Submit error', e); }
-
-  showView('student-thanks');
+    const r = await api('load', { quizId:id });
+    if(!r.ok) throw new Error(r.error);
+    quiz = r.quiz;
+    quiz.defaultSeconds = quiz.defaultSeconds || 60;
+    fillMeta(); renderList(); showShare(); $('save-status').innerHTML = '';
+  }catch(e){ $('save-status').innerHTML = `<div class="status-msg status-err">✗ ${esc(e.message)}</div>`; }
 }
 
-/* ══════════════ ADMIN LOGIN ══════════════ */
-function attemptAdminLogin(){
-  const pw = document.getElementById('admin-pw').value;
-  if(pw === ADMIN_PASSWORD){
-    sessionStorage.setItem('kn_admin_auth','1');
-    document.getElementById('admin-login-err').classList.add('hidden');
-    enterAdminDashboard();
-  } else {
-    document.getElementById('admin-login-err').classList.remove('hidden');
-  }
+function fillMeta(){
+  $('meta-title').value = quiz.title; $('meta-subtitle').value = quiz.subtitle;
+  $('meta-minutes').value = quiz.generalMinutes; $('meta-defsec').value = quiz.defaultSeconds;
+  $('meta-penalty').value = quiz.tabPenalty;
+  setTimeMode(quiz.timeMode, true);
 }
-function adminLogout(){
-  sessionStorage.removeItem('kn_admin_auth');
-  showView('student-reg');
+function readMeta(){
+  quiz.title = $('meta-title').value.trim(); quiz.subtitle = $('meta-subtitle').value.trim();
+  quiz.generalMinutes = parseFloat($('meta-minutes').value) || 9;
+  quiz.defaultSeconds = parseInt($('meta-defsec').value,10) || 60;
+  const p = parseFloat($('meta-penalty').value); quiz.tabPenalty = isNaN(p) ? 1.5 : p;
 }
-function enterAdminDashboard(){
-  showView('admin-dashboard');
-  loadCfgIntoSettingsForm();
-  loadQuestionsIntoAdmin();
-}
-
-/* ══════════════ ADMIN TABS ══════════════ */
-function switchAdminTab(tab){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  ['questions','results','settings'].forEach(t=>{
-    document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
-  });
-  if(tab==='results') loadResults();
+function setTimeMode(mode, silent){
+  quiz.timeMode = mode;
+  $('mode-general').classList.toggle('selected', mode==='general');
+  $('mode-per').classList.toggle('selected', mode==='per');
+  $('box-general').classList.toggle('hidden', mode!=='general');
+  $('box-default').classList.toggle('hidden', mode!=='per');
+  $('mode-info').textContent = mode==='general'
+    ? 'Students get one countdown for the whole answer sheet. Questions are not shown on their phones — you project them.'
+    : 'Each question has its own countdown on the student\'s phone. When it ends the sheet moves to the next question automatically and they cannot go back. Set a default here, then adjust any question individually.';
+  if(!silent) renderList();
 }
 
-/* ══════════════ ADMIN: QUESTIONS ══════════════ */
-let adminQuestions = [];
-let editingQuestionId = null;
-
-async function loadQuestionsIntoAdmin(){
-  const cfg = loadCfg();
-  try{
-    if(cfg.token && cfg.owner && cfg.repo){
-      const res = await githubGetFile(cfg);
-      const data = JSON.parse(res.decoded);
-      testData = data;
-    } else {
-      await loadPublicQuestions();
-    }
-  }catch(e){
-    console.warn('Falling back to public questions.json', e);
-    await loadPublicQuestions();
-  }
-  adminQuestions = JSON.parse(JSON.stringify(testData.questions||[]));
-  document.getElementById('meta-title').value = testData.testTitle || '';
-  document.getElementById('meta-subtitle').value = testData.testSubtitle || '';
-  document.getElementById('meta-time').value = testData.timeLimitMinutes || 9;
-  renderAdminQuestionList();
-}
-
-function renderAdminQuestionList(){
-  const list = document.getElementById('admin-q-list');
-  list.innerHTML = '';
-  document.getElementById('q-count').textContent = adminQuestions.length;
-  adminQuestions.forEach((q,i)=>{
-    const row = document.createElement('div');
-    row.className = 'admin-q-row';
-    let meta = '';
+/* ═════════ QUESTION LIST ═════════ */
+function renderList(){
+  $('q-count').textContent = quiz.questions.length;
+  const list = $('q-list'); list.innerHTML = '';
+  quiz.questions.forEach((q,i)=>{
+    let meta;
     if(q.type==='mcq') meta = `Multiple Choice · correct: ${q.correct}`;
     else if(q.type==='text') meta = `Word Answer · accepted: ${q.correctText||'—'}`;
-    else meta = `Calculation · ${q.correctValue}×10^${q.exponent} ${q.unit} · ±${q.tolerancePct}%`;
-    row.innerHTML = `
-      <div>
-        <div class="admin-q-row-text">Q${i+1}${q.note?` — ${q.note}`:''}</div>
-        <div class="admin-q-row-meta">${meta}</div>
-      </div>
-      <div class="admin-q-row-actions">
-        <button class="btn btn-ghost small-btn" onclick="moveQuestion(${i},-1)">↑</button>
-        <button class="btn btn-ghost small-btn" onclick="moveQuestion(${i},1)">↓</button>
-        <button class="btn btn-ghost small-btn" onclick="openQuestionEditor('${q.id}')">Edit</button>
-        <button class="btn btn-danger small-btn" onclick="deleteQuestion('${q.id}')">Delete</button>
+    else meta = `Calculation · ${q.correctValue} × 10^${q.exponent||0} ${q.unit||''} · ±${q.tolerancePct}%`;
+    if(quiz.timeMode==='per') meta += ` · ${q.time || quiz.defaultSeconds}s`;
+    const row = document.createElement('div'); row.className='admin-q-row';
+    row.innerHTML = `<div><div class="q-title">Q${i+1}${q.note?' — '+esc(q.note):''}</div><div class="q-meta">${esc(meta)}</div></div>
+      <div class="q-actions">
+        <button class="btn btn-ghost small-btn" onclick="moveQ(${i},-1)">↑</button>
+        <button class="btn btn-ghost small-btn" onclick="moveQ(${i},1)">↓</button>
+        <button class="btn btn-ghost small-btn" onclick="openEditor('${esc(q.id)}')">Edit</button>
+        <button class="btn btn-danger small-btn" onclick="delQ('${esc(q.id)}')">Delete</button>
       </div>`;
     list.appendChild(row);
   });
 }
+function moveQ(i,d){ const j=i+d; if(j<0||j>=quiz.questions.length) return; [quiz.questions[i],quiz.questions[j]]=[quiz.questions[j],quiz.questions[i]]; renderList(); }
+function delQ(id){ if(!confirm('Delete this question?')) return; quiz.questions = quiz.questions.filter(q=>q.id!==id); renderList(); }
 
-function moveQuestion(i,dir){
-  const j = i+dir;
-  if(j<0 || j>=adminQuestions.length) return;
-  [adminQuestions[i],adminQuestions[j]] = [adminQuestions[j],adminQuestions[i]];
-  renderAdminQuestionList();
+/* ═════════ EDITOR ═════════ */
+function setEditorType(t){
+  editorType=t;
+  ['mcq','text','calc'].forEach(x=>{ $('t-'+x).classList.toggle('selected',x===t); $('ed-'+x).classList.toggle('hidden',x!==t); });
 }
-function deleteQuestion(id){
-  if(!confirm('Delete this question?')) return;
-  adminQuestions = adminQuestions.filter(q=>q.id!==id);
-  renderAdminQuestionList();
-}
-
-function openQuestionEditor(id){
-  editingQuestionId = id;
-  const q = id ? adminQuestions.find(x=>x.id===id) : null;
-  document.getElementById('editor-title').textContent = id ? 'Edit Question' : 'Add Question';
+function openEditor(id){
+  readMeta();
+  editingId = id;
+  const q = id ? quiz.questions.find(x=>x.id===id) : null;
+  $('editor-title').textContent = id ? 'Edit Question' : 'Add Question';
   setEditorType(q?.type || 'mcq');
-  document.getElementById('ed-correct').value = q?.correct || 'A';
-  document.getElementById('ed-correcttext').value = q?.correctText || '';
-  document.getElementById('ed-calcvalue').value = q?.correctValue ?? '';
-  document.getElementById('ed-calcexp').value = q?.exponent ?? 0;
-  document.getElementById('ed-calcunit').value = q?.unit || '';
-  document.getElementById('ed-tolerance').value = q?.tolerancePct ?? 5;
-  document.getElementById('ed-note').value = q?.note || '';
-  document.getElementById('editor-overlay').classList.remove('hidden');
+  $('ed-correct').value = q?.correct || 'A';
+  $('ed-correcttext').value = q?.correctText || '';
+  $('ed-value').value = q?.correctValue ?? '';
+  $('ed-exp').value = q?.exponent ?? 0;
+  $('ed-unit').value = q?.unit || '';
+  $('ed-tol').value = q?.tolerancePct ?? 5;
+  $('ed-note').value = q?.note || '';
+  $('ed-time').value = q?.time || quiz.defaultSeconds;
+  $('ed-time-box').classList.toggle('hidden', quiz.timeMode!=='per');
+  $('editor-overlay').classList.remove('hidden');
 }
-function closeEditor(){ document.getElementById('editor-overlay').classList.add('hidden'); }
-
-let editorType = 'mcq';
-function setEditorType(type){
-  editorType = type;
-  document.getElementById('type-mcq-btn').classList.toggle('selected', type==='mcq');
-  document.getElementById('type-text-btn').classList.toggle('selected', type==='text');
-  document.getElementById('type-calc-btn').classList.toggle('selected', type==='calc');
-  document.getElementById('ed-mcq-fields').classList.toggle('hidden', type!=='mcq');
-  document.getElementById('ed-text-fields').classList.toggle('hidden', type!=='text');
-  document.getElementById('ed-calc-fields').classList.toggle('hidden', type!=='calc');
-}
-
-function saveQuestionFromEditor(){
-  const note = document.getElementById('ed-note').value.trim();
+function closeEditor(){ $('editor-overlay').classList.add('hidden'); }
+function saveQuestion(){
+  const id = editingId || ('q' + Date.now().toString(36) + Math.random().toString(36).slice(2,5));
+  const note = $('ed-note').value.trim();
+  const time = Math.max(5, parseInt($('ed-time').value,10) || quiz.defaultSeconds);
   let q;
-  if(editorType==='mcq'){
-    q = { id: editingQuestionId || ('q_'+Date.now()+Math.random().toString(36).slice(2,7)), type:'mcq', correct: document.getElementById('ed-correct').value, note };
-  } else if(editorType==='text'){
-    const txt = document.getElementById('ed-correcttext').value.trim();
-    if(!txt){ alert('Please enter at least one accepted answer.'); return; }
-    q = { id: editingQuestionId || ('q_'+Date.now()+Math.random().toString(36).slice(2,7)), type:'text', correctText: txt, note };
+  if(editorType==='mcq') q = { id, type:'mcq', correct:$('ed-correct').value, note, time };
+  else if(editorType==='text'){
+    const t = $('ed-correcttext').value.trim();
+    if(!t){ alert('Enter at least one accepted answer.'); return; }
+    q = { id, type:'text', correctText:t, note, time };
   } else {
-    q = {
-      id: editingQuestionId || ('q_'+Date.now()+Math.random().toString(36).slice(2,7)),
-      type:'calc',
-      correctValue: parseFloat(document.getElementById('ed-calcvalue').value)||0,
-      exponent: parseInt(document.getElementById('ed-calcexp').value,10)||0,
-      unit: document.getElementById('ed-calcunit').value.trim(),
-      tolerancePct: parseFloat(document.getElementById('ed-tolerance').value)||5,
-      note,
-    };
+    const v = parseFloat($('ed-value').value);
+    if(isNaN(v)){ alert('Enter the correct numeric value.'); return; }
+    const tol = parseFloat($('ed-tol').value);
+    q = { id, type:'calc', correctValue:v, exponent:parseInt($('ed-exp').value,10)||0, unit:$('ed-unit').value.trim(),
+          tolerancePct: isNaN(tol)?5:tol, note, time };
   }
-
-  if(editingQuestionId){
-    const idx = adminQuestions.findIndex(x=>x.id===editingQuestionId);
-    adminQuestions[idx] = q;
-  } else {
-    adminQuestions.push(q);
-  }
-  closeEditor();
-  renderAdminQuestionList();
+  if(editingId){ const i = quiz.questions.findIndex(x=>x.id===editingId); quiz.questions[i]=q; }
+  else quiz.questions.push(q);
+  closeEditor(); renderList();
 }
 
-/* ══════════════ GITHUB API ══════════════ */
-function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
-function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
-
-async function githubGetFile(cfg){
-  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}`;
-  const res = await fetch(url, { headers:{ 'Accept':'application/vnd.github+json', 'Authorization':`token ${cfg.token}` } });
-  if(!res.ok){ throw new Error(`GitHub GET failed (${res.status})`); }
-  const data = await res.json();
-  const decoded = b64DecodeUnicode((data.content||'').replace(/\n/g,''));
-  return { sha: data.sha, decoded };
-}
-
-async function githubPutFile(cfg, contentObj, sha, message){
-  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
-  const body = { message: message || 'Update questions via admin panel', content: b64EncodeUnicode(JSON.stringify(contentObj,null,2)), branch: cfg.branch };
-  if(sha) body.sha = sha;
-  const res = await fetch(url, {
-    method:'PUT',
-    headers:{ 'Accept':'application/vnd.github+json', 'Authorization':`token ${cfg.token}`, 'Content-Type':'application/json' },
-    body: JSON.stringify(body)
-  });
-  if(!res.ok){ const t = await res.text(); throw new Error(`GitHub PUT failed (${res.status}): ${t}`); }
-  return res.json();
-}
-
-async function publishQuestions(){
-  const statusEl = document.getElementById('publish-status');
-  const cfg = loadCfg();
-  if(!cfg.token || !cfg.owner || !cfg.repo){
-    statusEl.innerHTML = `<div class="status-msg status-err">Please fill in GitHub Owner, Repo and Token in the Settings tab first.</div>`;
-    return;
-  }
-  statusEl.innerHTML = `<div class="status-msg">Publishing…</div>`;
-  const payload = {
-    testTitle: document.getElementById('meta-title').value.trim() || 'Pre-Test',
-    testSubtitle: document.getElementById('meta-subtitle').value.trim() || '',
-    timeLimitMinutes: parseInt(document.getElementById('meta-time').value,10) || 9,
-    questions: adminQuestions,
-  };
+/* ═════════ SAVE / SHARE ═════════ */
+async function saveQuiz(){
+  readMeta();
+  const st = $('save-status');
+  if(!quiz.title){ st.innerHTML='<div class="status-msg status-err">Give the quiz a title first (it becomes the Excel tab name).</div>'; return; }
+  if(!quiz.questions.length){ st.innerHTML='<div class="status-msg status-err">Add at least one question.</div>'; return; }
+  $('btn-save').disabled = true; st.innerHTML = '<div class="status-msg">Saving and preparing the sheet…</div>';
   try{
-    let sha = null;
-    try{ sha = (await githubGetFile(cfg)).sha; }catch(e){ /* file may not exist yet */ }
-    await githubPutFile(cfg, payload, sha, 'Update questions via admin panel');
-    statusEl.innerHTML = `<div class="status-msg status-ok">✓ Published! Students will see this the next time they open the link (may take a minute for GitHub Pages to refresh).</div>`;
-    testData = payload;
-  }catch(e){
-    statusEl.innerHTML = `<div class="status-msg status-err">✗ ${e.message}</div>`;
-  }
+    const r = await api('save', { quiz });
+    if(!r.ok) throw new Error(r.error);
+    quiz.id = r.id;
+    st.innerHTML = `<div class="status-msg status-ok">✓ Saved. Results tab in your spreadsheet: "${esc(r.sheetName)}".</div>`;
+    await refreshQuizList(r.id);
+    showShare();
+  }catch(e){ st.innerHTML = `<div class="status-msg status-err">✗ ${esc(e.message)}</div>`; }
+  $('btn-save').disabled = false;
+}
+function answerBase(){
+  return localStorage.getItem('qb_answer_base') || new URL('answer.html', location.href).href;
+}
+function saveBase(){ localStorage.setItem('qb_answer_base', $('answer-base').value.trim()); showShare(); }
+function showShare(){
+  if(!quiz.id) return;
+  $('share-card').classList.remove('hidden');
+  $('answer-base').value = answerBase();
+  const link = answerBase() + (answerBase().includes('?') ? '&' : '?') + 'quiz=' + encodeURIComponent(quiz.id);
+  $('share-link').value = link;
+  const qr = $('qr'); qr.innerHTML = '';
+  try{ new QRCode(qr, { text: link, width: 150, height: 150 }); }catch(e){ qr.style.display='none'; }
+}
+async function copyLink(){
+  const v = $('share-link').value;
+  try{ await navigator.clipboard.writeText(v); }catch(e){ $('share-link').select(); document.execCommand('copy'); }
+  $('save-status').innerHTML = '<div class="status-msg status-ok">Link copied.</div>';
 }
 
-async function reloadQuestionsFromGitHub(){
-  await loadQuestionsIntoAdmin();
-  document.getElementById('publish-status').innerHTML = `<div class="status-msg status-ok">Reloaded latest version from GitHub.</div>`;
-}
-
-/* ══════════════ ADMIN: SETTINGS ══════════════ */
-function loadCfgIntoSettingsForm(){
-  const cfg = loadCfg();
-  document.getElementById('cfg-owner').value = cfg.owner;
-  document.getElementById('cfg-repo').value = cfg.repo;
-  document.getElementById('cfg-branch').value = cfg.branch;
-  document.getElementById('cfg-path').value = cfg.path;
-  document.getElementById('cfg-token').value = cfg.token;
-}
-function saveAdminConfig(){
-  const cfg = {
-    owner: document.getElementById('cfg-owner').value.trim(),
-    repo: document.getElementById('cfg-repo').value.trim(),
-    branch: document.getElementById('cfg-branch').value.trim() || 'main',
-    path: document.getElementById('cfg-path').value.trim() || 'data/questions.json',
-    token: document.getElementById('cfg-token').value.trim(),
-  };
-  saveCfgToStorage(cfg);
-  document.getElementById('settings-status').innerHTML = `<div class="status-msg status-ok">✓ Settings saved on this browser.</div>`;
-}
-async function testGitHubConnection(){
-  const cfg = loadCfg();
-  const statusEl = document.getElementById('settings-status');
-  statusEl.innerHTML = `<div class="status-msg">Testing…</div>`;
-  try{
-    await githubGetFile(cfg);
-    statusEl.innerHTML = `<div class="status-msg status-ok">✓ Connected — file found and readable.</div>`;
-  }catch(e){
-    statusEl.innerHTML = `<div class="status-msg status-err">✗ ${e.message}. If the file doesn't exist yet, that's fine — Publish will create it.</div>`;
-  }
-}
-
-/* ══════════════ ADMIN: RESULTS ══════════════ */
+/* ═════════ RESULTS ═════════ */
 async function loadResults(){
-  const statusEl = document.getElementById('results-status');
-  statusEl.textContent = 'Loading…';
+  const st = $('results-status');
+  $('res-title').textContent = quiz.title || 'no quiz selected';
+  if(!quiz.id){ st.textContent = 'Open or save a quiz in the Quiz Builder tab first.'; return; }
+  st.textContent = 'Loading…';
   try{
-    const res = await fetch(`${GOOGLE_SCRIPT_URL}?sheet=Sheet1`);
-    const rows = await res.json();
-    const arr = Array.isArray(rows) ? rows : [];
-    if(arr.length===0){
-      statusEl.textContent = 'No submissions yet.';
-      document.getElementById('stat-cards').style.display='none';
-      document.getElementById('results-table').style.display='none';
-      return;
+    const r = await api('results', { quizId: quiz.id });
+    if(!r.ok) throw new Error(r.error);
+    const arr = r.rows || [];
+    if(!arr.length){
+      st.textContent='No submissions yet.'; $('stat-cards').style.display='none'; $('results-table').style.display='none'; return;
     }
-    const pct = arr.map(r=>parseFloat(r.percentage)||0);
-    const avg = (pct.reduce((a,b)=>a+b,0)/pct.length).toFixed(1);
-    const high = Math.max(...pct).toFixed(1);
-    document.getElementById('stat-count').textContent = arr.length;
-    document.getElementById('stat-avg').textContent = avg+'%';
-    document.getElementById('stat-high').textContent = high+'%';
-    document.getElementById('stat-cards').style.display='grid';
-
-    const ranked = [...arr].sort((a,b)=>(parseFloat(b.finalScore)||0)-(parseFloat(a.finalScore)||0));
-    const tbody = document.getElementById('results-tbody');
-    tbody.innerHTML = '';
-    ranked.forEach((r,i)=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${i+1}</td><td>${r.studentName||''}</td><td>${r.indexNumber||''}</td><td>${r.programme||''}</td><td>${r.groupNumber||''}</td><td>${r.finalScore||0}/${r.totalQuestions||''}</td><td>${r.percentage||0}%</td>`;
-      tbody.appendChild(tr);
+    const pct = arr.map(x=>parseFloat(x.percentage)||0);
+    $('stat-count').textContent = arr.length;
+    $('stat-avg').textContent = (pct.reduce((a,b)=>a+b,0)/pct.length).toFixed(1)+'%';
+    $('stat-high').textContent = Math.max(...pct).toFixed(1)+'%';
+    $('stat-cards').style.display='grid';
+    const tb = $('results-tbody'); tb.innerHTML='';
+    [...arr].sort((a,b)=>(parseFloat(b.finalScore)||0)-(parseFloat(a.finalScore)||0)).forEach((x,i)=>{
+      const tr=document.createElement('tr');
+      [i+1,x.studentName,x.indexNumber,x.programme,x.groupNumber,`${x.finalScore}/${x.totalQuestions}`,`${x.percentage}%`].forEach(v=>{
+        const td=document.createElement('td'); td.textContent=v ?? ''; tr.appendChild(td);
+      });
+      tb.appendChild(tr);
     });
-    document.getElementById('results-table').style.display='table';
-    statusEl.textContent = `Loaded ${arr.length} submission(s).`;
-  }catch(e){
-    statusEl.textContent = 'Could not load results: '+e.message;
-  }
+    $('results-table').style.display='table';
+    st.textContent = `Loaded ${arr.length} submission(s).`;
+  }catch(e){ st.textContent = 'Could not load results: ' + e.message; }
 }
 
-/* ══════════════ INIT ══════════════ */
-(function init(){
-  if(sessionStorage.getItem('kn_admin_auth')==='1'){
-    enterAdminDashboard();
+/* ═════════ INIT ═════════ */
+(async function(){
+  if(PW){
+    try{ const r = await api('verify'); if(r.ok){ enterApp(); return; } }catch(e){}
+    PW=''; sessionStorage.removeItem('qb_pw');
   }
 })();
 </script>
