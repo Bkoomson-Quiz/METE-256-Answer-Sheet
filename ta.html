@@ -89,6 +89,12 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--s
 #pj-join .t{font-size:clamp(16px,1.8vw,24px);font-weight:700;}
 #proj .p-bar{display:flex;gap:10px;justify-content:center;padding:14px;border-top:2px solid var(--blue-soft);flex-wrap:wrap;background:#fff;}
 #proj .p-bar .btn{padding:11px 24px;font-size:15px;}
+
+.tbar{height:16px;background:#e6edf8;border-radius:99px;overflow:hidden;}
+.tbar>i{display:block;height:100%;width:100%;background:#16a34a;border-radius:99px;transition:width .3s linear,background-color .3s;}
+.tbar>i.yellow{background:#eab308;} .tbar>i.red{background:#dc2626;}
+#pj-tbar{margin:0 40px 6px;}
+#pj-timer.danger{animation:none;}
 </style>
 </head>
 <body>
@@ -117,6 +123,7 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--s
     <div><div class="p-title" id="pj-title"></div><div class="p-num" id="pj-num"></div></div>
     <div id="pj-timer" class="hidden">--:--</div>
   </div>
+  <div class="tbar hidden" id="pj-tbar"><i id="pj-tbar-i"></i></div>
   <div class="p-body">
     <div id="pj-welcome">
       <span class="badge">Quiz</span>
@@ -175,6 +182,21 @@ async function openQuiz(id){
 }
 
 /* ═════════ PROJECTOR ═════════ */
+
+let _ac=null;
+function unlockAudio(){ try{ _ac = _ac || new (window.AudioContext||window.webkitAudioContext)(); if(_ac.state==='suspended') _ac.resume(); }catch(e){} }
+function beep(){ try{ if(!_ac) return; const o=_ac.createOscillator(), g=_ac.createGain(); o.type='square'; o.frequency.value=980;
+  g.gain.setValueAtTime(0.0001,_ac.currentTime); g.gain.exponentialRampToValueAtTime(0.25,_ac.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.0001,_ac.currentTime+0.16);
+  o.connect(g); g.connect(_ac.destination); o.start(); o.stop(_ac.currentTime+0.18); }catch(e){} }
+let _lastBeep=-1;
+function paintBar(barEl, rem, total){
+  const f = total>0 ? Math.max(0,Math.min(1,rem/total)) : 0;
+  barEl.style.width = (f*100)+'%';
+  const red = rem>0 && f<=0.25, yellow = !red && f<=0.5;
+  barEl.className = red ? 'red' : yellow ? 'yellow' : '';
+  if(red && rem!==_lastBeep){ _lastBeep=rem; beep(); }
+  if(!red) _lastBeep=-1;
+}
 let quiz = null;
 let pj = { phase:'welcome', idx:0, running:false, endLocal:0, busy:false, timer:null };
 const pjPer = () => quiz.timeMode === 'per';
@@ -185,7 +207,7 @@ function openProjector(){
   pj = { phase:'welcome', idx:0, running:false, endLocal:0, busy:false, timer:null };
   $('proj').classList.remove('hidden');
   $('pj-title').textContent = ''; $('pj-num').textContent = '';
-  $('pj-timer').classList.add('hidden');
+  $('pj-timer').classList.add('hidden'); $('pj-tbar').classList.add('hidden');
   $('pj-welcome').classList.remove('hidden'); $('pj-q').classList.add('hidden');
   $('w-title').textContent = quiz.title; $('w-sub').textContent = quiz.subtitle || '';
   const n = quiz.questions.length;
@@ -207,7 +229,7 @@ function closeProjector(){
 }
 function showQuestionUI(){
   $('pj-welcome').classList.add('hidden'); $('pj-q').classList.remove('hidden');
-  $('pj-title').textContent = quiz.title; $('pj-timer').classList.remove('hidden');
+  $('pj-title').textContent = quiz.title; $('pj-timer').classList.remove('hidden'); $('pj-tbar').classList.remove('hidden');
 }
 function pjRender(){
   const q = quiz.questions[pj.idx], n = quiz.questions.length;
@@ -240,17 +262,18 @@ async function pjGo(idx){
   if(idx >= quiz.questions.length){ return pjFinish(); }
   pj.idx = idx; pjRender();
   const secs = quiz.questions[idx].time || 60;
-  pj.endLocal = Date.now() + secs*1000; pj.running = true; pj.busy = true;
+  pj.endLocal = Date.now() + secs*1000; pj.total = secs; pj.running = true; pj.busy = true;
   await goLive(idx, secs);
   pj.busy = false;
 }
 async function pjStart(){
+  unlockAudio();
   pj.phase = 'quiz'; showQuestionUI();
   $('pj-start').classList.add('hidden'); $('pj-end').classList.remove('hidden'); $('pj-next').classList.remove('hidden');
   if(pjPer()){ $('pj-next').textContent = 'Skip →'; await pjGo(0); }
   else { $('pj-prev').classList.remove('hidden'); $('pj-next').textContent = 'Next →';
          pj.idx = 0; pjRender(); const secs = Math.round(quiz.generalMinutes*60);
-         pj.endLocal = Date.now() + secs*1000; pj.running = true; pj.busy = true;
+         pj.endLocal = Date.now() + secs*1000; pj.total = secs; pj.running = true; pj.busy = true;
          await goLive(0, secs); pj.busy = false; }
 }
 function pjStep(d){
@@ -265,7 +288,7 @@ async function pjFinish(){
   $('pj-welcome').classList.add('hidden'); $('pj-q').classList.remove('hidden');
   $('pj-num').textContent = ''; $('pj-text').textContent = 'Time is up — the quiz has ended. Thank you!';
   $('pj-opts').innerHTML=''; $('pj-hint').textContent='';
-  $('pj-timer').classList.remove('hidden'); $('pj-timer').textContent='0:00'; $('pj-timer').classList.remove('warning','danger');
+  $('pj-timer').classList.remove('hidden'); $('pj-timer').textContent='0:00'; $('pj-timer').classList.remove('warning','danger'); $('pj-tbar-i').style.width='0%';
   ['pj-prev','pj-next','pj-end'].forEach(i=>$(i).classList.add('hidden'));
   try{ await post('live', { quizId:quiz.id, status:'finished' }); }catch(e){}
 }
@@ -273,9 +296,9 @@ function pjTick(){
   if(!pj.running) return;
   const el = $('pj-timer');
   const rem = Math.max(0, Math.ceil((pj.endLocal - Date.now())/1000));
-  el.textContent = fmtT(rem);
-  const warn = pjPer() ? 5 : 60, dang = pjPer() ? 3 : 30;
-  el.classList.toggle('danger', rem<=dang); el.classList.toggle('warning', rem>dang && rem<=warn);
+  el.textContent = fmtT(rem); paintBar($('pj-tbar-i'), rem, pj.total||1);
+  const fr = rem/(pj.total||1);
+  el.classList.toggle('danger', fr<=0.25); el.classList.toggle('warning', fr>0.25 && fr<=0.5);
   if(rem<=0 && !pj.busy){ if(pjPer()) pjGo(pj.idx+1); else pjFinish(); }
 }
 document.addEventListener('keydown', e=>{
