@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Answer Sheet</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 <style>
 :root{
@@ -157,9 +158,7 @@ let cfg = null;
     $('reg-badge').textContent = cfg.title;
     $('reg-subtitle').textContent = cfg.subtitle || '';
     const n = cfg.questions.length, pen = cfg.tabPenalty;
-    const timing = cfg.timeMode==='per'
-      ? `each question is timed and moves on automatically (${fmt(cfg.questions.reduce((a,q)=>a+(q.time||0),0))} total)`
-      : `total time: ${cfg.generalMinutes} minute(s)`;
+    const timing = `each question is timed and moves on automatically`;
     $('reg-info').textContent = `${n} questions · shown on the projector, not here · ${timing} · the sheet opens when the instructor starts the quiz · tab switch = −${pen} pts`;
     showView('reg');
   }catch(e){ $('loading-text').textContent = 'Could not load this quiz: ' + e.message; }
@@ -200,7 +199,7 @@ function paintBar(barEl, rem, total){
   if(!red) _lastBeep=-1;
 }
 let live = null, liveOffset = 0, shownIdx = -1, sheetBuilt = false, livePollTimer = null, liveDisplayTimer = null;
-const isPer = () => cfg.timeMode === 'per';
+const isPer = () => true;
 
 function regError(msg){ const e=$('reg-err'); e.textContent=msg; e.classList.remove('hidden'); }
 
@@ -231,7 +230,7 @@ function schedPos(st, serverNowMs){
 }
 
 function liveEnded(st){
-  if(!st) return false;
+  if(!st || (st.status==='running' && !Array.isArray(st.durs))) return false;
   if(st.status==='finished') return true;
   return st.status==='running' && schedPos(st, serverNow()).done === true;
 }
@@ -251,7 +250,8 @@ async function beginQuiz(){
     }
   }catch(e){ console.warn('Duplicate check failed — the server will re-check on submit.', e); }
   try{
-    const st = await fetchLive();
+    for(let i=0;i<3;i++) await fetchLive();      // calibrate the server clock (lowest-latency sample wins)
+    const st = live;
     if(liveEnded(st)){ regError('This quiz has already ended.'); btn.disabled=false; btn.textContent='Start →'; return; }
   }catch(e){}
 
@@ -293,6 +293,7 @@ function liveTick(){
   if(live.status==='finished'){ stopLive(); submitQuiz(); return; }
   if(live.status!=='running'){ el.textContent = '--:--'; return; }
 
+  if(!Array.isArray(live.durs)){ el.textContent='--:--'; return; }
   const p = schedPos(live, serverNow());
   if(p.done){
     document.querySelectorAll('#answer-grid input').forEach(i => i.disabled = true);
