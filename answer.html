@@ -204,23 +204,36 @@ const isPer = () => cfg.timeMode === 'per';
 
 function regError(msg){ const e=$('reg-err'); e.textContent=msg; e.classList.remove('hidden'); }
 
-/* server clock helpers: offset = serverTime - localTime, measured at the midpoint of the request */
+/* server clock: offset = serverTime - localTime, kept from the lowest-latency sample */
+let bestRtt = Infinity;
 async function fetchLive(){
   const t0 = Date.now();
-  const r = await (await fetch(`${SCRIPT_URL}?action=live&quiz=${encodeURIComponent(QUIZ_ID)}`, {cache:'no-store'})).json();
-  const t1 = Date.now();
-  if(r.ok && r.state){ live = r.state; liveOffset = (r.state.now || t1) - (t0 + t1)/2; }
+  const r = await (await fetch(`${SCRIPT_URL}?action=live&quiz=${encodeURIComponent(QUIZ_ID)}&_=${t0}`, {cache:'no-store'})).json();
+  const t1 = Date.now(), rtt = t1 - t0;
+  if(r.ok && r.state){
+    live = r.state;
+    bestRtt *= 1.15;                                   // let old samples age out
+    if(rtt <= bestRtt || bestRtt===Infinity){ bestRtt = rtt; liveOffset = (r.state.now || t1) - (t0 + t1)/2; }
+  }
   return live;
 }
-const remaining = () => Math.max(0, Math.ceil((live.endsAt - (Date.now() + liveOffset))/1000));
+const serverNow = () => Date.now() + liveOffset;
+
+/* schedule → position. t = server-clock seconds since startAt; returns {idx, rem, total} or {done:true} */
+function schedPos(st, serverNowMs){
+  const t = (serverNowMs - st.startAt)/1000; let acc = 0;
+  for(let i=0;i<st.durs.length;i++){
+    const d = st.durs[i];
+    if(t < acc + d) return { idx:i, rem: Math.max(0, Math.ceil(acc + d - t)), total:d };
+    acc += d;
+  }
+  return { done:true };
+}
+
 function liveEnded(st){
   if(!st) return false;
   if(st.status==='finished') return true;
-  if(st.status==='running'){
-    const rem = (st.endsAt - (Date.now() + liveOffset))/1000;
-    return rem <= 0 && (!isPer() || st.idx >= cfg.questions.length-1);
-  }
-  return false;
+  return st.status==='running' && schedPos(st, serverNow()).done === true;
 }
 
 async function beginQuiz(){
@@ -252,7 +265,7 @@ async function beginQuiz(){
   showWaiting();
   showView('quiz');
   pollLive();
-  liveDisplayTimer = setInterval(liveTick, 250);
+  liveDisplayTimer = setInterval(liveTick, 100);
 
   document.addEventListener('contextmenu', e=>e.preventDefault());
   document.addEventListener('copy', e=>e.preventDefault());
@@ -268,13 +281,10 @@ function showWaiting(){
 /* ═════════ FOLLOW THE PROJECTOR ═════════ */
 async function pollLive(){
   if(submitted) return;
-  let delay = 3000;
   try{ await fetchLive(); }catch(e){}
-  if(live && live.status==='running'){
-    const rem = (live.endsAt - (Date.now()+liveOffset))/1000;
-    delay = rem > 6 ? Math.min(5000, (rem-5)*1000) : 1000;
-  }
-  livePollTimer = setTimeout(pollLive, delay + Math.random()*500);
+  // transitions are driven by the shared clock, not by polling; polling only catches Start / Skip / End quickly
+  const delay = (live && live.status==='running') ? 3000 : 2000;
+  livePollTimer = setTimeout(pollLive, delay);
 }
 
 function liveTick(){
@@ -283,27 +293,21 @@ function liveTick(){
   if(live.status==='finished'){ stopLive(); submitQuiz(); return; }
   if(live.status!=='running'){ el.textContent = '--:--'; return; }
 
-  if(!running){ running = true; startedAt = Date.now(); }       // quiz is live: timer + tab rules start now
-  const rem = remaining();
-  if(isPer()){
-    if(live.idx !== shownIdx){
-      shownIdx = live.idx; curIdx = Math.min(live.idx, cfg.questions.length-1);
-      renderCurrent();
-    }
-  } else if(!sheetBuilt){
-    sheetBuilt = true; renderFullSheet();
+  const p = schedPos(live, serverNow());
+  if(p.done){
+    document.querySelectorAll('#answer-grid input').forEach(i => i.disabled = true);
+    el.textContent = fmt(0); stopLive(); setTimeout(submitQuiz, 400); return;     // hard cut-off
   }
+  if(!running){ running = true; startedAt = Date.now(); }
+  if(isPer()){
+    if(p.idx !== shownIdx){ shownIdx = p.idx; curIdx = Math.min(p.idx, cfg.questions.length-1); renderCurrent(); }
+  } else if(!sheetBuilt){ sheetBuilt = true; renderFullSheet(); }
+  const rem = p.rem, total = p.total;
   el.textContent = fmt(rem);
-  el.classList.remove('warning','danger');
-  const total = live.total || Math.max(rem, isPer() ? (cfg.questions[curIdx].time||0) : (cfg.generalMinutes*60||0)) || 1;
   const fr = rem/total;
   el.classList.remove('warning','danger');
   if(fr<=0.25) el.classList.add('danger'); else if(fr<=0.5) el.classList.add('warning');
   paintBar($('timer-bar-i'), rem, total);
-  if(rem<=0){
-    document.querySelectorAll('#answer-grid input').forEach(i => i.disabled = true);   // time is up: cut off
-    if(!isPer() || live.idx >= cfg.questions.length-1){ stopLive(); setTimeout(submitQuiz, 600); }
-  }
 }
 function stopLive(){ clearInterval(liveDisplayTimer); clearTimeout(livePollTimer); }
 
