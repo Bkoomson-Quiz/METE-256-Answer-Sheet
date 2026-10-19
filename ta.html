@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TA Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#ffffff; --surface:#ffffff; --surface2:#f3f7fe; --border:#cddcf3;
+  --blue:#1d4ed8; --blue-dark:#173ea8; --blue-soft:#e6efff; --blue-line:#9db8ee;
+  --success:#15803d; --danger:#b91c1c; --warning:#b45309;
+  --text:#000; --muted:#3f4a59; --shadow:0 4px 24px rgba(29,78,216,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#000;min-height:100vh;}
+.hidden{display:none !important;}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 48px;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:30px;margin-bottom:20px;}
+h1,h2,h3{font-family:'DM Sans',sans-serif;font-weight:800;color:#000;letter-spacing:-.01em;}
+.topbar{height:6px;background:linear-gradient(90deg,var(--blue),#4f8bff);}
+.badge{display:inline-block;background:var(--blue-soft);border:1.5px solid var(--blue-line);color:#000;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:30px;}
+.field{margin-bottom:18px;}
+.field label,.lbl{display:block;font-size:12px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:#000;margin-bottom:7px;}
+input[type=text],input[type=number],input[type=password],textarea,select{
+  width:100%;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;
+  font-family:'DM Sans',sans-serif;font-size:15px;color:#000;outline:none;}
+textarea{resize:vertical;min-height:70px;}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,78,216,.15);}
+.btn{cursor:pointer;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:13px 26px;transition:transform .15s,background .15s;}
+.btn:hover{transform:translateY(-1px);}
+.btn-primary,.btn-success{background:var(--blue);color:#fff;box-shadow:0 4px 16px rgba(29,78,216,.25);}
+.btn-primary:hover,.btn-success:hover{background:var(--blue-dark);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-ghost{background:#fff;border:1.5px solid var(--blue-line);color:#000;}
+.btn-ghost:hover{background:var(--blue-soft);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.small-btn{padding:7px 12px;font-size:12px;border-radius:8px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.chip{padding:12px 8px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-weight:600;font-size:14px;color:#000;cursor:pointer;text-align:center;}
+.chip:hover{border-color:var(--blue);background:var(--surface2);}
+.chip.selected{border-color:var(--blue);background:var(--blue-soft);box-shadow:inset 0 0 0 1px var(--blue);font-weight:800;}
+.toggle{display:flex;gap:8px;margin-bottom:14px;}
+.toggle .chip{flex:1;}
+.info{background:var(--blue-soft);border:1.5px solid #bcd0f5;border-radius:10px;padding:14px 16px;font-size:13px;color:#000;line-height:1.6;margin-bottom:20px;}
+.err{background:#fff;color:#000;border:1.5px solid var(--danger);border-left-width:6px;border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:16px;}
+.status-msg{font-size:13px;padding:10px 14px;border-radius:10px;margin-top:12px;color:#000;background:var(--surface2);border:1px solid var(--border);}
+.status-ok{border-left:5px solid var(--success);background:#f1faf4;}
+.status-err{border-left:5px solid var(--danger);background:#fff5f5;}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.footer{text-align:center;margin-top:26px;font-size:12px;color:var(--muted);letter-spacing:1px;}
+.overlay{position:fixed;inset:0;background:rgba(10,25,60,.45);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#fff;border-radius:18px;padding:30px;max-width:560px;width:100%;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);color:#000;}
+th{font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--surface2);}
+@keyframes pulse{from{opacity:1}to{opacity:.5}}
+@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr;} .card{padding:20px;}}
+
+.qcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;}
+.qcard{background:#fff;border:1.5px solid var(--border);border-top:5px solid var(--blue);border-radius:14px;padding:18px;cursor:pointer;text-align:left;font-family:inherit;box-shadow:var(--shadow);transition:transform .15s;}
+.qcard:hover{transform:translateY(-2px);background:var(--surface2);}
+.qcard b{display:block;font-size:17px;color:#000;margin-bottom:4px;}
+.qcard span{font-size:13px;color:var(--muted);display:block;}
+.empty{padding:30px;text-align:center;color:var(--muted);}
+
+/* projector (white background, black writing) */
+#proj{position:fixed;inset:0;z-index:200;background:#fff;color:#000;display:flex;flex-direction:column;}
+#proj .p-bar-top{height:10px;background:linear-gradient(90deg,var(--blue),#4f8bff);flex-shrink:0;}
+#proj .p-top{display:flex;justify-content:space-between;align-items:center;padding:18px 44px;border-bottom:2px solid var(--blue-soft);gap:20px;min-height:96px;}
+#proj .p-title{font-size:26px;font-weight:800;}
+#proj .p-num{font-size:15px;letter-spacing:3px;text-transform:uppercase;font-weight:700;color:var(--muted);}
+#pj-timer{font-family:'JetBrains Mono',monospace;font-size:64px;font-weight:700;color:#000;line-height:1;background:var(--blue-soft);border:2px solid var(--blue-line);border-radius:16px;padding:8px 24px;}
+#pj-timer.warning{color:var(--warning);} #pj-timer.danger{color:var(--danger);animation:pulse .6s infinite alternate;}
+#proj .p-body{flex:1;overflow-y:auto;padding:36px 60px;display:flex;flex-direction:column;justify-content:center;gap:26px;max-width:1300px;width:100%;margin:0 auto;}
+#pj-text{font-size:clamp(28px,4vw,54px);font-weight:700;line-height:1.3;white-space:pre-wrap;}
+.pj-opt{display:flex;gap:18px;align-items:flex-start;font-size:clamp(22px,2.8vw,38px);line-height:1.35;padding:14px 22px;border:2px solid var(--blue-line);border-radius:16px;margin-bottom:12px;}
+.pj-opt b{font-family:'JetBrains Mono',monospace;min-width:1.4em;color:#000;}
+#pj-hint{font-size:clamp(18px,2vw,28px);color:var(--muted);}
+#pj-welcome{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;}
+#pj-welcome h1{font-size:clamp(38px,6vw,78px);line-height:1.1;}
+#pj-welcome .sub{font-size:clamp(20px,2.6vw,34px);color:var(--muted);}
+#pj-welcome .inst{font-size:clamp(22px,3vw,40px);font-weight:700;border-top:3px solid var(--blue);padding-top:18px;margin-top:6px;}
+#pj-welcome .meta{font-size:clamp(16px,1.8vw,24px);}
+#pj-join{display:flex;align-items:center;gap:22px;margin-top:10px;background:var(--surface2);border:2px solid var(--border);border-radius:18px;padding:16px 24px;}
+#pj-join #pj-qr{background:#fff;padding:8px;border-radius:10px;}
+#pj-join .t{font-size:16px;text-align:left;max-width:360px;word-break:break-all;}
+#proj .p-bar{display:flex;gap:10px;justify-content:center;padding:14px;border-top:2px solid var(--blue-soft);flex-wrap:wrap;background:#fff;}
+#proj .p-bar .btn{padding:11px 24px;font-size:15px;}
+</style>
+</head>
+<body>
+
+<!-- QUIZ LIST -->
+<div id="view-list">
+  <div class="topbar"></div>
+  <div class="wrap">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div><span class="badge">TA Portal</span>
+        <h2 style="font-size:26px;margin-top:10px;">Select a quiz to project</h2>
+        <div style="font-size:14px;color:var(--muted);margin-top:4px;">Only quizzes Dr. Koomson has made active appear here.</div></div>
+      <div class="row"><button class="btn btn-ghost small-btn" onclick="loadList()">Refresh</button>
+        <a class="btn btn-ghost small-btn" href="index.html" style="text-decoration:none;color:#000;">← Portal</a></div>
+    </div>
+    <div id="list-status" style="font-size:13px;margin-bottom:12px;"></div>
+    <div class="qcards" id="qcards"></div>
+    <div class="footer">©Team Benny</div>
+  </div>
+</div>
+
+<!-- PROJECTOR -->
+<div id="proj" class="hidden">
+  <div class="p-bar-top"></div>
+  <div class="p-top">
+    <div><div class="p-title" id="pj-title"></div><div class="p-num" id="pj-num"></div></div>
+    <div id="pj-timer" class="hidden">--:--</div>
+  </div>
+  <div class="p-body">
+    <div id="pj-welcome">
+      <span class="badge">Quiz</span>
+      <h1 id="w-title"></h1>
+      <div class="sub" id="w-sub"></div>
+      <div class="inst">Instructor: Dr. Bennetta Koomson</div>
+      <div class="meta" id="w-meta"></div>
+      <div id="pj-join"><div id="pj-qr"></div><div class="t"><b>Join on your phone</b><br><span id="pj-link"></span></div></div>
+    </div>
+    <div id="pj-q" class="hidden">
+      <div id="pj-text"></div>
+      <div id="pj-opts" style="margin-top:22px;"></div>
+      <div id="pj-hint" style="margin-top:8px;"></div>
+    </div>
+  </div>
+  <div class="p-bar">
+    <button class="btn btn-primary" id="pj-start" onclick="pjStart()">▶ Start quiz</button>
+    <button class="btn btn-ghost hidden" id="pj-prev" onclick="pjStep(-1)">← Previous</button>
+    <button class="btn btn-ghost hidden" id="pj-next" onclick="pjStep(1)">Next →</button>
+    <button class="btn btn-ghost hidden" id="pj-end" onclick="pjFinish()">End quiz</button>
+    <button class="btn btn-ghost" onclick="closeProjector()">Close</button>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkyX30HvqzdWFtds4JEkK_vNi0nMjpvyjqSPat9nZZEvez7cMfkPqNtlwU4K-IsYFs/exec";
+const $ = id => document.getElementById(id);
+const here = f => new URL(f, location.href).href;
+const post = (action, payload) => fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ action, ...payload }) }).then(r=>r.json());
+
+/* ═════════ QUIZ LIST ═════════ */
+async function loadList(){
+  const st = $('list-status'), box = $('qcards');
+  st.textContent = 'Loading quizzes…'; box.innerHTML = '';
+  try{
+    const r = await (await fetch(`${SCRIPT_URL}?action=quizzes`)).json();
+    if(!r.ok) throw new Error(r.error || 'Server error');
+    if(!r.quizzes.length){ st.textContent = ''; box.innerHTML = '<div class="card empty" style="grid-column:1/-1;">No active quizzes yet. Ask Dr. Koomson to save a quiz.</div>'; return; }
+    st.textContent = '';
+    r.quizzes.forEach(q=>{
+      const b = document.createElement('button'); b.className = 'qcard';
+      const t = document.createElement('b'); t.textContent = q.title;
+      const s1 = document.createElement('span'); s1.textContent = q.subtitle || '';
+      const s2 = document.createElement('span'); s2.textContent = `${q.questions} questions · ${q.timeMode==='per' ? 'timer per question' : 'one general time'}`;
+      b.append(t, s1, s2); b.onclick = () => openQuiz(q.id); box.appendChild(b);
+    });
+  }catch(e){ st.textContent = 'Could not load quizzes: ' + e.message; }
+}
+async function openQuiz(id){
+  $('list-status').textContent = 'Opening quiz…';
+  try{
+    const r = await (await fetch(`${SCRIPT_URL}?action=projector&quiz=${encodeURIComponent(id)}`)).json();
+    if(!r.ok) throw new Error(r.error || 'Quiz not found');
+    quiz = r.quiz; $('list-status').textContent = ''; openProjector();
+  }catch(e){ $('list-status').textContent = 'Could not open quiz: ' + e.message; }
+}
+
+/* ═════════ PROJECTOR ═════════ */
+let quiz = null;
+let pj = { phase:'welcome', idx:0, running:false, endLocal:0, busy:false, timer:null };
+const pjPer = () => quiz.timeMode === 'per';
+const fmtT = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+
+function openProjector(){
+  clearInterval(pj.timer);
+  pj = { phase:'welcome', idx:0, running:false, endLocal:0, busy:false, timer:null };
+  $('proj').classList.remove('hidden');
+  $('pj-title').textContent = ''; $('pj-num').textContent = '';
+  $('pj-timer').classList.add('hidden');
+  $('pj-welcome').classList.remove('hidden'); $('pj-q').classList.add('hidden');
+  $('w-title').textContent = quiz.title; $('w-sub').textContent = quiz.subtitle || '';
+  const n = quiz.questions.length;
+  $('w-meta').textContent = pjPer()
+    ? `${n} questions · each question is timed (${fmtT(quiz.questions.reduce((a,q)=>a+(q.time||0),0))} in total)`
+    : `${n} questions · ${quiz.generalMinutes} minute(s) in total`;
+  const link = here('answer.html') + '?quiz=' + encodeURIComponent(quiz.id);
+  $('pj-link').textContent = link;
+  const qr = $('pj-qr'); qr.innerHTML = ''; try{ new QRCode(qr, { text: link, width: 130, height: 130 }); }catch(e){}
+  $('pj-start').classList.remove('hidden');
+  ['pj-prev','pj-next','pj-end'].forEach(i=>$(i).classList.add('hidden'));
+  post('live', { quizId:quiz.id, status:'idle' }).catch(()=>{});
+  pj.timer = setInterval(pjTick, 250);
+}
+function closeProjector(){
+  if(pj.running && !confirm('The quiz is running. Close the projector anyway?')) return;
+  clearInterval(pj.timer); $('proj').classList.add('hidden'); loadList();
+}
+function showQuestionUI(){
+  $('pj-welcome').classList.add('hidden'); $('pj-q').classList.remove('hidden');
+  $('pj-title').textContent = quiz.title; $('pj-timer').classList.remove('hidden');
+}
+function pjRender(){
+  const q = quiz.questions[pj.idx], n = quiz.questions.length;
+  $('pj-num').textContent = `Question ${pj.idx+1} of ${n}`;
+  $('pj-text').textContent = q.text || '';
+  const o = $('pj-opts'); o.innerHTML = '';
+  if(q.type==='mcq'){
+    ['A','B','C','D'].forEach(L=>{
+      if(!(q.options||{})[L]) return;
+      const d = document.createElement('div'); d.className='pj-opt';
+      const b = document.createElement('b'); b.textContent = L + '.';
+      const t = document.createElement('span'); t.textContent = q.options[L];
+      d.append(b,t); o.appendChild(d);
+    });
+  }
+  $('pj-hint').textContent = q.type==='calc'
+    ? 'Answer is a number' + ((q.exponent||q.unit) ? ' — ' + [(q.exponent ? '× 10^'+q.exponent : ''), q.unit].filter(Boolean).join(' ') + ' is already shown on your phone' : '')
+    : q.type==='text' ? 'Type your answer on your phone' : '';
+}
+async function pjGo(idx){
+  if(idx >= quiz.questions.length){ return pjFinish(); }
+  pj.idx = idx; pjRender();
+  const secs = quiz.questions[idx].time || 60;
+  pj.endLocal = Date.now() + secs*1000; pj.running = true; pj.busy = true;
+  try{
+    const r = await post('live', { quizId:quiz.id, status:'running', idx, seconds:secs });
+    if(r.ok && r.state) pj.endLocal = Date.now() + (r.state.endsAt - r.now);
+  }catch(e){}
+  pj.busy = false;
+}
+async function pjStart(){
+  pj.phase = 'quiz'; showQuestionUI();
+  $('pj-start').classList.add('hidden'); $('pj-end').classList.remove('hidden'); $('pj-next').classList.remove('hidden');
+  if(pjPer()){ $('pj-next').textContent = 'Skip →'; await pjGo(0); }
+  else { $('pj-prev').classList.remove('hidden'); $('pj-next').textContent = 'Next →';
+         pj.idx = 0; pjRender(); pj.endLocal = Date.now() + quiz.generalMinutes*60000; pj.running = true; }
+}
+function pjStep(d){
+  if(pj.phase!=='quiz') return;
+  if(pjPer()){ if(pj.running && d>0) pjGo(pj.idx+1); return; }
+  const n = pj.idx + d;
+  if(n<0 || n>=quiz.questions.length) return;
+  pj.idx = n; pjRender();
+}
+async function pjFinish(){
+  pj.running = false; pj.phase = 'done';
+  $('pj-welcome').classList.add('hidden'); $('pj-q').classList.remove('hidden');
+  $('pj-num').textContent = ''; $('pj-text').textContent = 'Time is up — the quiz has ended. Thank you!';
+  $('pj-opts').innerHTML=''; $('pj-hint').textContent='';
+  $('pj-timer').classList.remove('hidden'); $('pj-timer').textContent='0:00'; $('pj-timer').classList.remove('warning','danger');
+  ['pj-prev','pj-next','pj-end'].forEach(i=>$(i).classList.add('hidden'));
+  try{ await post('live', { quizId:quiz.id, status:'finished' }); }catch(e){}
+}
+function pjTick(){
+  if(!pj.running) return;
+  const el = $('pj-timer');
+  const rem = Math.max(0, Math.ceil((pj.endLocal - Date.now())/1000));
+  el.textContent = fmtT(rem);
+  const warn = pjPer() ? 5 : 60, dang = pjPer() ? 3 : 30;
+  el.classList.toggle('danger', rem<=dang); el.classList.toggle('warning', rem>dang && rem<=warn);
+  if(rem<=0 && !pj.busy){ if(pjPer()) pjGo(pj.idx+1); else pjFinish(); }
+}
+document.addEventListener('keydown', e=>{
+  if($('proj').classList.contains('hidden')) return;
+  if(e.key==='ArrowRight') pjStep(1); else if(e.key==='ArrowLeft') pjStep(-1);
+});
+
+loadList();
+</script>
+</body>
+</html>
