@@ -167,7 +167,7 @@ async function loadList(){
       const b = document.createElement('button'); b.className = 'qcard';
       const t = document.createElement('b'); t.textContent = q.title;
       const s1 = document.createElement('span'); s1.textContent = q.subtitle || '';
-      const s2 = document.createElement('span'); s2.textContent = `${q.questions} questions · ${q.timeMode==='per' ? 'timer per question' : 'one general time'}`;
+      const s2 = document.createElement('span'); s2.textContent = `${q.questions} questions · ${'timer per question'}`;
       b.append(t, s1, s2); b.onclick = () => openQuiz(q.id); box.appendChild(b);
     });
   }catch(e){ st.textContent = 'Could not load quizzes: ' + e.message; }
@@ -210,11 +210,11 @@ function schedPos(st, serverNowMs){
 }
 let quiz = null;
 let pj = { phase:'welcome', idx:0, running:false, endLocal:0, busy:false, timer:null };
-const pjPer = () => quiz.timeMode === 'per';
+const pjPer = () => true;
 const fmtT = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 
 function openProjector(){
-  clearInterval(pj.timer);
+  clearInterval(pj.timer); clearInterval(pj.pinger);
   pj = { phase:'welcome', idx:0, running:false, endLocal:0, busy:false, timer:null };
   $('proj').classList.remove('hidden');
   $('pj-title').textContent = ''; $('pj-num').textContent = '';
@@ -222,9 +222,7 @@ function openProjector(){
   $('pj-welcome').classList.remove('hidden'); $('pj-q').classList.add('hidden');
   $('w-title').textContent = quiz.title; $('w-sub').textContent = quiz.subtitle || '';
   const n = quiz.questions.length;
-  $('w-meta').textContent = pjPer()
-    ? `${n} questions · each question is timed (${fmtT(quiz.questions.reduce((a,q)=>a+(q.time||0),0))} in total)`
-    : `${n} questions · ${quiz.generalMinutes} minute(s) in total`;
+  $('w-meta').textContent = `${n} questions · each question is timed (${fmtT(quiz.questions.reduce((a,q)=>a+(q.time||60),0))} in total)`;
   const link = here('answer.html') + '?quiz=' + encodeURIComponent(quiz.id);
   const qr = $('pj-qr'); qr.innerHTML = '';
   const qs = Math.round(Math.max(220, Math.min(window.innerHeight*0.5, window.innerWidth*0.8, 520)));
@@ -233,10 +231,12 @@ function openProjector(){
   ['pj-prev','pj-next','pj-end'].forEach(i=>$(i).classList.add('hidden'));
   post('live', { quizId:quiz.id, status:'idle' }).catch(()=>{});
   pj.timer = setInterval(pjTick, 100);
+  clk.rtt = Infinity; (async()=>{ for(let i=0;i<5;i++) await pingClock(); })();
+  pj.pinger = setInterval(pingClock, 4000);
 }
 function closeProjector(){
   if(pj.running && !confirm('The quiz is running. Close the projector anyway?')) return;
-  clearInterval(pj.timer); $('proj').classList.add('hidden'); loadList();
+  clearInterval(pj.timer); clearInterval(pj.pinger); $('proj').classList.add('hidden'); loadList();
 }
 function showQuestionUI(){
   $('pj-welcome').classList.add('hidden'); $('pj-q').classList.remove('hidden');
@@ -260,17 +260,24 @@ function pjRender(){
     ? 'Answer is a number' + ((q.exponent||q.unit) ? ' — ' + [(q.exponent ? '× 10^'+q.exponent : ''), q.unit].filter(Boolean).join(' ') + ' is already shown on your phone' : '')
     : q.type==='text' ? 'Type your answer on your phone' : '';
 }
-const bestOffset = { v:0, rtt:Infinity };
-const sNow = () => Date.now() + bestOffset.v;
-const durations = () => pjPer() ? quiz.questions.map(q => q.time || 60) : [Math.round(quiz.generalMinutes*60)];
+const clk = { off:0, rtt:Infinity };
+const sNow = () => Date.now() + clk.off;
+const durations = () => quiz.questions.map(q => q.time || 60);
+async function pingClock(){          // exactly the same method the phones use, so both read the same server clock
+  try{
+    const t0 = Date.now();
+    const r = await (await fetch(`${SCRIPT_URL}?action=live&quiz=${encodeURIComponent(quiz.id)}&_=${t0}`, {cache:'no-store'})).json();
+    const t1 = Date.now(), rtt = t1-t0;
+    clk.rtt *= 1.15;
+    if(r.ok && r.state && (rtt <= clk.rtt || clk.rtt===Infinity)){ clk.rtt = rtt; clk.off = (r.state.now||t1) - (t0+t1)/2; }
+  }catch(e){}
+}
 async function goLive(skipTo){
   // one POST publishes the whole schedule; the projector and every phone then follow the same server clock
   try{
     const t0 = Date.now();
     const r = await post('live', { quizId:quiz.id, status:'running', durs:durations(), skipTo:skipTo||0 });
-    const t1 = Date.now();
     if(r.ok && r.state){
-      bestOffset.v = r.state.now - (t0+t1)/2; bestOffset.rtt = t1-t0;
       pj.sched = { durs:r.state.durs, startAt:r.state.startAt };
     }
   }catch(e){ pj.sched = { durs:durations(), startAt: Date.now() - (durations().slice(0,skipTo||0).reduce((a,b)=>a+b,0))*1000 }; }
