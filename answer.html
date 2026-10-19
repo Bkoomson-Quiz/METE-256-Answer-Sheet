@@ -198,10 +198,16 @@ async function beginQuiz(){
   buildSheet();
   showView('quiz');
   startedAt = Date.now();
-  if(cfg.timeMode==='per'){ timeLeft = cfg.questions[0].time || 60; $('timer-label').textContent = 'This Question'; }
-  else { timeLeft = Math.round(cfg.generalMinutes*60); }
-  tick(true);
-  timerInterval = setInterval(tick, 1000);
+  if(cfg.timeMode==='per'){
+    $('timer-label').textContent = 'This Question';
+    $('btn-action').classList.add('hidden');
+    $('timer-display').textContent = '--:--';
+    startLive();
+  } else {
+    timeLeft = Math.round(cfg.generalMinutes*60);
+    tick(true);
+    timerInterval = setInterval(tick, 1000);
+  }
 
   document.addEventListener('contextmenu', e=>e.preventDefault());
   document.addEventListener('copy', e=>e.preventDefault());
@@ -264,8 +270,10 @@ function rowFor(q, i, single){
 
 function buildSheet(){
   const grid = $('answer-grid'); grid.innerHTML = '';
-  if(cfg.timeMode==='per'){ renderCurrent(); }
-  else {
+  if(cfg.timeMode==='per'){
+    grid.innerHTML = '<div class="single-q" id="wait-msg"><div style="font-size:42px;margin-bottom:10px;">⏳</div><div style="font-weight:700;color:var(--brown-deep);">Waiting for the instructor to start…</div><div style="font-size:13px;color:var(--muted);margin-top:8px;">Keep this page open. Questions appear on the projector.</div></div>';
+    $('submit-note').textContent = 'The question and timer follow the projector. You can\'t go back to a previous question.';
+  } else {
     cfg.questions.forEach((q,i) => grid.appendChild(rowFor(q,i,false)));
     $('submit-note').textContent = 'Follow along with the questions on screen. Review before submitting — you can\'t change answers after.';
     $('btn-action').textContent = 'Submit Answers';
@@ -279,6 +287,40 @@ function renderCurrent(){
   $('btn-action').textContent = last ? 'Submit Answers' : 'Next →';
   $('submit-note').textContent = 'Each question has its own timer. You can\'t go back to a previous question.';
   updateProgress();
+}
+/* ── per-question mode: follow the projector ── */
+let live = null, liveOffset = 0, shownIdx = -1, livePollTimer = null, liveDisplayTimer = null;
+function startLive(){
+  pollLive();
+  liveDisplayTimer = setInterval(liveTick, 250);
+}
+async function pollLive(){
+  if(submitted) return;
+  let delay = 4000;
+  try{
+    const r = await (await fetch(`${SCRIPT_URL}?action=live&quiz=${encodeURIComponent(QUIZ_ID)}`)).json();
+    if(r.ok){ live = r.state; liveOffset = (r.state.now || Date.now()) - Date.now(); }
+  }catch(e){}
+  if(live && live.status==='running'){
+    const rem = (live.endsAt - (Date.now()+liveOffset))/1000;
+    delay = rem > 6 ? Math.min(5000, (rem-5)*1000) : 1200;
+  } else if(live && live.status==='idle') delay = 2500;
+  livePollTimer = setTimeout(pollLive, delay + Math.random()*400);
+}
+function liveTick(){
+  if(submitted || !live) return;
+  if(live.status==='finished'){ clearInterval(liveDisplayTimer); clearTimeout(livePollTimer); submitQuiz(); return; }
+  if(live.status!=='running') return;
+  if(live.idx !== shownIdx){
+    shownIdx = live.idx; curIdx = Math.min(live.idx, cfg.questions.length-1);
+    renderCurrent(); $('btn-action').classList.add('hidden');
+  }
+  const rem = Math.max(0, Math.ceil((live.endsAt - (Date.now()+liveOffset))/1000));
+  timeLeft = rem;
+  const el = $('timer-display');
+  el.textContent = fmt(rem);
+  el.classList.remove('warning','danger');
+  if(rem<=3) el.classList.add('danger'); else if(rem<=5) el.classList.add('warning');
 }
 function goNext(){
   curIdx++;
