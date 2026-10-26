@@ -355,7 +355,8 @@ async function refreshList(){
       <td>${q.questions}</td><td>${q.submissions}</td>
       <td><label class="switch"><input type="checkbox" ${q.active?'checked':''} onchange="toggleActive('${esc(q.id)}', this.checked)"><i></i></label></td>
       <td style="white-space:nowrap;"><button class="btn btn-ghost small-btn" onclick="editQuiz('${esc(q.id)}')">Edit</button>
-        <button class="btn btn-ghost small-btn" onclick="viewResults('${esc(q.id)}')">Results</button></td>`;
+        <button class="btn btn-ghost small-btn" onclick="viewResults('${esc(q.id)}')">Results</button>
+        <button class="btn btn-danger small-btn" onclick="deleteQuiz('${esc(q.id)}')">Delete</button></td>`;
     tb.appendChild(tr);
   });
   fillResultsSelect();
@@ -363,6 +364,19 @@ async function refreshList(){
 async function toggleActive(id, on){
   try{ const r = await api('setActive', { quizId:id, active:on }); if(!r.ok) throw new Error(r.error); }
   catch(e){ alert('Could not update: '+e.message); }
+  refreshList();
+}
+async function deleteQuiz(id){
+  const q = quizzes.find(x=>x.id===id); const name = q ? q.title : 'this quiz';
+  if(!confirm(`Delete "${name}"?\n\nIts student link and QR code will stop working. This cannot be undone.`)) return;
+  const wipe = (q && q.submissions>0)
+    ? confirm(`"${name}" has ${q.submissions} saved submission(s).\n\nOK = ALSO delete its results tab in the spreadsheet\nCancel = keep the results tab (only the quiz is removed)`)
+    : true;
+  try{
+    const r = await api('delete', { quizId:id, deleteResults: wipe });
+    if(!r.ok) throw new Error(r.error);
+    if(quiz && quiz.id===id) newQuiz(true);
+  }catch(e){ alert('Could not delete: '+e.message); }
   refreshList();
 }
 function viewResults(id){ nav('results'); $('res-select').value = id; loadResults(); }
