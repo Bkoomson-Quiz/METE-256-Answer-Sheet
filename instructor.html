@@ -182,6 +182,11 @@ pre.fmt{background:var(--surface2);border:1.5px solid var(--border);border-radiu
           <select id="res-select" style="flex:1;min-width:220px;" onchange="loadResults()"></select>
           <button class="btn btn-ghost small-btn" onclick="loadResults()">Refresh</button>
         </div>
+        <div class="row" style="margin-bottom:14px;">
+          <button class="btn btn-primary small-btn" id="btn-dl-sum" onclick="downloadResults('summary')" disabled>⬇ Download summary</button>
+          <button class="btn btn-ghost small-btn" id="btn-dl-det" onclick="downloadResults('detail')" disabled>⬇ Download detail</button>
+          <span style="font-size:12px;color:var(--muted);">Summary: name, index number, raw score · Detail: the whole sheet</span>
+        </div>
         <div id="results-status" style="font-size:13px;color:var(--muted);margin-bottom:12px;"></div>
         <div class="stat-cards" id="stat-cards" style="display:none;">
           <div class="stat-card"><div class="stat-num" id="stat-count">0</div><div class="stat-label">Submissions</div></div>
@@ -576,8 +581,33 @@ function fillResultsSelect(){
   sel.innerHTML = quizzes.length ? quizzes.map(q=>`<option value="${esc(q.id)}">${esc(q.title)}</option>`).join('') : '<option value="">No quizzes yet</option>';
   if(keep && quizzes.some(q=>q.id===keep)) sel.value = keep;
 }
+let lastRows = [], lastTitle = 'results';
+function setDlEnabled(on){ $('btn-dl-sum').disabled = $('btn-dl-det').disabled = !on; }
+function csvCell(v){
+  v = String(v ?? '');
+  if(/^[=+\-@]/.test(v)) v = "'" + v;                    // stop spreadsheet formula injection
+  return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+}
+function downloadResults(kind){
+  if(!lastRows.length) return;
+  let head, rows;
+  if(kind==='summary'){
+    head = ['Name','Index Number','Raw Score'];
+    rows = lastRows.map(x => [x.studentName, x.indexNumber, x.rawScore]);
+  } else {
+    head = ['Timestamp','Student Name','Index Number','Programme','Group','Raw Score','Tab Switches','Tab Penalty','Final Score','Total Questions','Percentage','Time Used (s)','Answers'];
+    rows = lastRows.map(x => [x.timestamp, x.studentName, x.indexNumber, x.programme, x.groupNumber, x.rawScore, x.tabSwitches, x.tabPenalty, x.finalScore, x.totalQuestions, x.percentage, x.timeUsed, x.answers]);
+  }
+  const csv = '\ufeff' + [head, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
+  const name = (lastTitle || 'results').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'') + '_' + kind + '.csv';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
 async function loadResults(){
   const st = $('results-status'), id = $('res-select').value;
+  lastRows = []; setDlEnabled(false);
   $('stat-cards').style.display='none'; $('results-table').style.display='none';
   if(!id){ st.textContent = 'Save a quiz first.'; return; }
   st.textContent = 'Loading…';
@@ -586,6 +616,8 @@ async function loadResults(){
     if(!r.ok) throw new Error(r.error);
     const arr = r.rows || [];
     if(!arr.length){ st.textContent='No submissions yet.'; return; }
+    lastRows = arr; setDlEnabled(true);
+    lastTitle = (quizzes.find(q=>q.id===id)||{}).title || 'results';
     const pct = arr.map(x=>parseFloat(x.percentage)||0);
     $('stat-count').textContent = arr.length;
     $('stat-avg').textContent = (pct.reduce((a,b)=>a+b,0)/pct.length).toFixed(1)+'%';
