@@ -86,6 +86,11 @@ th{font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--s
 .bulk-ta{min-height:260px;font-family:'JetBrains Mono',monospace;font-size:13px;}
 pre.fmt{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;overflow-x:auto;margin-bottom:14px;white-space:pre-wrap;color:#000;}
 .empty{padding:26px;text-align:center;color:var(--muted);}
+.bar{height:12px;border-radius:99px;background:#e6edf8;overflow:hidden;min-width:90px;} .bar>i{display:block;height:100%;border-radius:99px;}
+.lv-weak{background:#dc2626;} .lv-mid{background:#eab308;} .lv-good{background:#16a34a;}
+.tagp{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px;border:1.5px solid;white-space:nowrap;}
+.tagp.weak{border-color:#dc2626;background:#fff5f5;} .tagp.mid{border-color:#eab308;background:#fffbea;} .tagp.good{border-color:#16a34a;background:#f1faf4;}
+.crow{display:grid;grid-template-columns:minmax(120px,1.2fr) 2fr 170px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
 @media(max-width:820px){.shell{flex-direction:column;} .side{width:100%;height:auto;position:static;flex-direction:row;flex-wrap:wrap;border-right:none;border-bottom:1.5px solid var(--border);padding:12px;} .brand{width:100%;padding-bottom:6px;} .side .spacer{display:none;} .nav-btn{width:auto;} .main{padding:20px 14px 40px;} .stat-cards{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -193,6 +198,7 @@ pre.fmt{background:var(--surface2);border:1.5px solid var(--border);border-radiu
           <div class="stat-card"><div class="stat-num" id="stat-avg">0%</div><div class="stat-label">Average</div></div>
           <div class="stat-card"><div class="stat-num" id="stat-high">0%</div><div class="stat-label">Highest</div></div>
         </div>
+        <div id="analysis" class="hidden" style="margin-bottom:22px;"></div>
         <div style="overflow-x:auto;"><table id="results-table" style="display:none;">
           <thead><tr><th>Rank</th><th>Name</th><th>Index</th><th>Programme</th><th>Group</th><th>Score</th><th>%</th></tr></thead>
           <tbody id="results-tbody"></tbody></table></div>
@@ -263,6 +269,8 @@ pre.fmt{background:var(--surface2);border:1.5px solid var(--border);border-radiu
     </div>
 
     <div class="field hidden" id="ed-time-box"><label>Time for this question (seconds)</label><input type="number" id="ed-time" min="5" value="60" style="max-width:160px;"/></div>
+    <div class="field"><label>Concept / topic (optional — used to show what the class struggled with)</label>
+      <input type="text" id="ed-concept" list="concept-list" placeholder="e.g. Froth flotation"/><datalist id="concept-list"></datalist></div>
     <div class="field"><label>Admin Note (students never see this)</label><textarea id="ed-note" placeholder="Reminder of the actual question, for your reference"></textarea></div>
 
     <div class="row" style="margin-top:10px;">
@@ -291,7 +299,7 @@ Answer: collector, collectors
 3. Calculate the recovery of the concentrate.
 Answer: 2.5 x 10^3 kg
 Tol: 5</pre>
-    <div class="info">Options A–D present → multiple choice. A number answer (optionally "× 10^n" and a unit) → calculation, and the exponent and unit appear on the phone already. Anything else → word answer; separate accepted spellings with commas. "Time:" (seconds) and "Tol:" (%) are optional.</div>
+    <div class="info">Add an optional <b>Topic:</b> line (e.g. <code>Topic: Froth flotation</code>) so the Results page can show which concepts the class found hardest. Options A–D present → multiple choice. A number answer (optionally "× 10^n" and a unit) → calculation, and the exponent and unit appear on the phone already. Anything else → word answer; separate accepted spellings with commas. "Time:" (seconds) and "Tol:" (%) are optional.</div>
     <textarea id="bulk-text" class="bulk-ta" placeholder="Paste your questions here"></textarea>
     <div id="bulk-status"></div>
     <div class="row" style="margin-top:14px;">
@@ -463,6 +471,8 @@ function openEditor(id){
   $('ed-tol').value = q?.tolerancePct ?? 5;
   $('ed-note').value = q?.note || '';
   $('ed-qtext').value = q?.text || '';
+  $('ed-concept').value = q?.concept || '';
+  $('concept-list').innerHTML = [...new Set(quiz.questions.map(x=>x.concept).filter(Boolean))].map(c=>`<option value="${esc(c)}">`).join('');
   ['A','B','C','D'].forEach(L => $('ed-opt'+L).value = (q?.options||{})[L] || '');
   $('ed-time').value = q?.time || quiz.defaultSeconds;
   $('ed-time-box').classList.toggle('hidden', quiz.timeMode!=='per');
@@ -487,7 +497,7 @@ function saveQuestion(){
     q = { id, type:'calc', correctValue:v, exponent:parseInt($('ed-exp').value,10)||0, unit:$('ed-unit').value.trim(),
           tolerancePct: isNaN(tol)?5:tol, note, time };
   }
-  q.text = text;
+  q.text = text; q.concept = $('ed-concept').value.trim();
   if(editingId){ const i = quiz.questions.findIndex(x=>x.id===editingId); quiz.questions[i]=q; }
   else quiz.questions.push(q);
   closeEditor(); renderList();
@@ -532,12 +542,13 @@ function parseBulk(text){
   const out=[], errs=[];
   blocks.forEach((b,bi)=>{
     const lines = b.split('\n').map(l=>l.trim()).filter(Boolean);
-    let ql=[], opts={}, ans='', time=null, tol=null, type=null, cur=null, m;
+    let ql=[], opts={}, ans='', time=null, tol=null, type=null, concept='', cur=null, m;
     lines.forEach(l=>{
       if(m=l.match(/^(?:answer|ans|correct)\s*[:\-]\s*(.+)$/i)) ans=m[1].trim();
       else if(m=l.match(/^(?:time|seconds)\s*[:\-]\s*(\d+)/i)) time=+m[1];
       else if(m=l.match(/^(?:tol|tolerance)\s*[:\-]\s*([\d.]+)/i)) tol=+m[1];
       else if(m=l.match(/^type\s*[:\-]\s*(\w+)/i)) type=m[1].toLowerCase();
+      else if(m=l.match(/^(?:topic|concept)\s*[:\-]\s*(.+)$/i)) concept=m[1].trim();
       else if(m=l.match(/^\(?([A-Da-d])[\)\.:]\s*(.*)$/)){ cur=m[1].toUpperCase(); opts[cur]=m[2]; }
       else if(cur) opts[cur]+=' '+l;
       else ql.push(l);
@@ -546,7 +557,7 @@ function parseBulk(text){
     const label = 'Block '+(bi+1);
     if(!ans){ errs.push(label+': no "Answer:" line'); return; }
     const id = 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2,6) + bi;
-    const q = { id, text, note:'', time: time || quiz.defaultSeconds };
+    const q = { id, text, note:'', concept, time: time || quiz.defaultSeconds };
     const hasOpts = Object.keys(opts).length >= 2;
     const calc = ans.match(/^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s*(?:[x×*]\s*10\s*\^\s*(-?\d+))?\s*(.*)$/i);
     if(type==='mcq' || (!type && hasOpts)){
@@ -605,9 +616,38 @@ function downloadResults(kind){
   a.download = name; document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
+const lvl = p => p<50 ? ['weak','Needs review'] : p<70 ? ['mid','Developing'] : ['good','Strong'];
+async function loadAnalysis(id){
+  const box = $('analysis');
+  try{
+    const r = await api('analysis', { quizId:id });
+    if(!r.ok) throw new Error(r.error);
+    const qs = r.questions || [], cs = r.concepts || [];
+    let h = '<h3 style="font-size:16px;margin-bottom:6px;">What the class struggled with</h3>';
+    if(cs.length){
+      const worst = cs[0], [wk,wl] = lvl(worst.pctCorrect);
+      h += `<div class="info" style="margin-bottom:12px;"><b>Needs the most attention:</b> ${esc(worst.name)} — only ${worst.pctCorrect}% correct across ${worst.questions.length} question(s) (Q${worst.questions.join(', Q')}). ${wk==='good' ? 'Every concept is at a healthy level.' : 'Consider re-teaching this before the next class.'}</div>`;
+      h += cs.map(c=>{ const [k,l]=lvl(c.pctCorrect);
+        return `<div class="crow"><div><b>${esc(c.name)}</b><div style="font-size:12px;color:var(--muted);">Q${c.questions.join(', Q')}</div></div>
+          <div class="bar"><i class="lv-${k}" style="width:${c.pctCorrect}%"></i></div>
+          <div style="white-space:nowrap;"><b>${c.pctCorrect}%</b> <span class="tagp ${k}">${l}</span></div></div>`; }).join('');
+    } else {
+      h += '<div class="info">To group results by concept, give each question a <b>Concept / topic</b> in the question editor (or a <code>Topic:</code> line in bulk paste), then save. Until then, the question-by-question view below still shows the hardest questions.</div>';
+    }
+    const hard = [...qs].sort((a,b)=>a.pctCorrect-b.pctCorrect);
+    h += '<h3 style="font-size:14px;margin:16px 0 6px;">Question by question (hardest first)</h3><div style="overflow-x:auto;"><table><thead><tr><th>Q</th><th>Concept</th><th>Question</th><th>Correct</th><th>Most common wrong answers</th></tr></thead><tbody>' +
+      hard.map(q=>{ const [k]=lvl(q.pctCorrect);
+        const wr = q.topWrong.length ? q.topWrong.map(w=>`${esc(w.answer)} (${w.count})`).join(', ') : '—';
+        return `<tr><td>Q${q.n}</td><td>${esc(q.concept||'—')}</td><td style="max-width:260px;">${esc((q.text||'(no text)').slice(0,90))}<div style="font-size:11px;color:var(--muted);">Answer: ${esc(q.answer)}</div></td>
+          <td style="min-width:130px;"><div class="bar"><i class="lv-${k}" style="width:${q.pctCorrect}%"></i></div><b>${q.pctCorrect}%</b>${q.pctBlank?` <span style="font-size:11px;color:var(--muted);">(${q.pctBlank}% blank)</span>`:''}</td>
+          <td style="font-size:13px;">${wr}</td></tr>`; }).join('') + '</tbody></table></div>';
+    h += '<div style="font-size:12px;color:var(--muted);margin-top:8px;">Based on '+r.submissions+' submission(s), marked against the quiz as it is saved now. Under 50% = needs review, 50–69% = developing, 70%+ = strong.</div>';
+    box.innerHTML = h; box.classList.remove('hidden');
+  }catch(e){ box.innerHTML = '<div class="status-msg status-err">Could not load the concept analysis: '+esc(e.message)+'</div>'; box.classList.remove('hidden'); }
+}
 async function loadResults(){
   const st = $('results-status'), id = $('res-select').value;
-  lastRows = []; setDlEnabled(false);
+  lastRows = []; setDlEnabled(false); $('analysis').classList.add('hidden');
   $('stat-cards').style.display='none'; $('results-table').style.display='none';
   if(!id){ st.textContent = 'Save a quiz first.'; return; }
   st.textContent = 'Loading…';
@@ -616,7 +656,7 @@ async function loadResults(){
     if(!r.ok) throw new Error(r.error);
     const arr = r.rows || [];
     if(!arr.length){ st.textContent='No submissions yet.'; return; }
-    lastRows = arr; setDlEnabled(true);
+    lastRows = arr; setDlEnabled(true); loadAnalysis(id);
     lastTitle = (quizzes.find(q=>q.id===id)||{}).title || 'results';
     const pct = arr.map(x=>parseFloat(x.percentage)||0);
     $('stat-count').textContent = arr.length;
